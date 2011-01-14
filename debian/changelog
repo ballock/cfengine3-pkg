@@ -24,9 +24,11 @@ cfengine3 (3.1.0~b2+dfsg-1) experimental; urgency=low
     + docs/ContributorStatement.pdf added
 
  -- Antonio Radici <antonio@debian.org>  Sun, 17 Oct 2010 21:55:10 +0100
+
 cfengine3 (3.0.5+dfsg-2) unstable; urgency=low
 
   * Quoting variable names in debian/cfengine3.init (Closes: 605044)
+  * Fixing variable names in debian/cfengine3.default (Closes: 602404)
 
  -- Antonio Radici <antonio@debian.org>  Fri, 14 Jan 2011 13:08:05 +0000
 
