@@ -15,6 +15,8 @@ cfengine3 (3.6.2-1) unstable; urgency=low
     + got rid of the info and html docs, they are not shipped anymore
   * debian/patches:
     + major cleanup done, some patches adapted to the new code
+  * debian/NEWS:
+    + added this file to announce the demise of the inputs symlink.
 
  -- Antonio Radici <antonio@debian.org>  Tue, 21 Oct 2014 14:49:40 +0000
 
