@@ -4,30 +4,29 @@
 %:
 	dh $@ --with quilt
 
+# --enable-shared=no \
+# --disable-shared \
+
 override_dh_auto_configure:
 	dh_autoreconf
-	./configure \
-# --disable-shared \
-		    --enable-static \
-#		    --enable-shared=no \
-				--prefix=/usr \
-				--with-sql=yes \
-				--with-mysql \
-				--with-postgresql \
-				--with-libvirt \
-				--with-lmdb \
-				--with-libxml2 \
-				--with-workdir=/var/lib/cfengine3 \
-				--with-logdir=/var/log/cfengine3 \
-				--with-piddir=/run/cfengine3 \
-				--libdir=/usr/lib/cfengine3 \
-				--docdir=\$${prefix}/share/doc/cfengine3 \
-				--datadir=\$${prefix}/share/cfengine3 \
-				--mandir=\$${prefix}/share/man \
-				--infodir=\$${prefix}/share/info \
-				--htmldir=\$${prefix}/share/doc/cfengine3/html \
-				CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,relro" \
-				CPPFLAGS=-D_FORTIFY_SOURCE=2
+	./configure 	--prefix=/usr \
+			--with-sql=yes \
+			--with-mysql \
+			--with-postgresql \
+			--with-libvirt \
+			--with-lmdb \
+			--with-libxml2 \
+			--with-workdir=/var/lib/cfengine3 \
+			--with-logdir=/var/log/cfengine3 \
+			--with-piddir=/run/cfengine3 \
+			--libdir=/usr/lib/cfengine3 \
+			--docdir=\$${prefix}/share/doc/cfengine3 \
+			--datadir=\$${prefix}/share/cfengine3 \
+			--mandir=\$${prefix}/share/man \
+			--infodir=\$${prefix}/share/info \
+			--htmldir=\$${prefix}/share/doc/cfengine3/html \
+			CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,relro" \
+			CPPFLAGS=-D_FORTIFY_SOURCE=2
 
 override_dh_clean:
 	dh_autoreconf_clean
