@@ -60,6 +60,11 @@ override_dh_install:
 	/bin/rmdir $(CURDIR)/debian/cfengine3/var/lib/cfengine3/inputs
 	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
 
+	# libpromises3 package.
+	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so* \
+                $(CURDIR)/debian/libpromises3/usr/lib
+	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/lib
+
 	## Man pages are created with an undocumented flag
 	#
 	/bin/mkdir -p $(CURDIR)/debian/cfengine3/usr/share/man/man8/
