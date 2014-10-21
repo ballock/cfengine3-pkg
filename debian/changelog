@@ -2,6 +2,12 @@ cfengine3 (3.6.2-1) unstable; urgency=low
 
   * New upstream release
     + big thanks to Brian Bennett and debian-team@cfengine.com!
+    + no longer using /etc/cfengine3 as repository for the state files;
+      documented that in NEWS.Debian
+  * debian/postinst:
+    + added code to migrate the files contained in /etc/cfengine3 to
+     /var/lib/cfengine3 if and only if the latter is a symlink to the directory
+     in /etc.
   * debian/control:
     + added libpromises3 as output of the build process
     + Standards-Version updated to 3.9.6
