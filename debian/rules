@@ -20,8 +20,6 @@ override_dh_auto_configure:
 			--docdir=\$${prefix}/share/doc/cfengine3 \
 			--datadir=\$${prefix}/share/cfengine3 \
 			--mandir=\$${prefix}/share/man \
-			--infodir=\$${prefix}/share/info \
-			--htmldir=\$${prefix}/share/doc/cfengine3/html \
 			CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,relro" \
 			CPPFLAGS=-D_FORTIFY_SOURCE=2
 
@@ -32,19 +30,12 @@ override_dh_clean:
 override_dh_compress:
 	dh_compress -X.cf
 
-override_dh_installinfo:
-
 override_dh_strip:
 	dh_strip --dbg-package=cfengine3-dbg
 
 override_dh_installchangelogs:
 	rm debian/cfengine3/usr/share/doc/cfengine3/ChangeLog
 	dh_installchangelogs
-
-##  There is no html documentation
-#
-override_dh_installdocs:
-	dh_installdocs
 
 override_dh_install:
 	dh_testdir

@@ -5,6 +5,8 @@ cfengine3 (3.6.2-1) unstable; urgency=low
   * debian/control:
     + added libpromises3 as output of the build process.
     + Standards-Version updated to 3.9.6
+  * debian/rules:
+    + got rid of the info and html docs, they are not shipped anymore.
 
  -- Antonio Radici <antonio@debian.org>  Tue, 21 Oct 2014 14:49:40 +0000
 
