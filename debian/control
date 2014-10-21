@@ -35,3 +35,14 @@ Description: debugging symbols for cfengine3
  on a network should be configured.
  .
  This package contains the debugging symbols for cfengine3.
+
+Package: libpromises3
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: libpromises library for cfengine3 binaries
+ The main purpose of cfengine is to allow the system administrator
+ to create a single central file which will define how every host
+ on a network should be configured.
+ .
+ This package contains the libpromises3 library.
