@@ -1,0 +1,13 @@
+Index: Cfengine-debian/libpromises/generic_agent.c
+===================================================================
+--- Cfengine-debian.orig/libpromises/generic_agent.c
++++ Cfengine-debian/libpromises/generic_agent.c
+@@ -1236,7 +1236,7 @@ void GenericAgentWriteHelp(Writer *w, co
+     {
+         if (options[i].has_arg)
+         {
+-            WriterWriteF(w, "  --%-12s, -%c value - %s\n", options[i].name, (char) options[i].val, hints[i]);
++            WriterWriteF(w, "  --%-12s, -%c - %s\n", options[i].name, (char) options[i].val, hints[i]);
+         }
+         else
+         {
