@@ -16,3 +16,15 @@ Index: Cfengine-debian/Makefile.am
  	examples tests
  
  # Set explicitly to avoid picking up {nova}/*.m4
+Index: Cfengine-debian/configure.ac
+===================================================================
+--- Cfengine-debian.orig/configure.ac
++++ Cfengine-debian/configure.ac
+@@ -1404,7 +1404,6 @@ AC_CONFIG_FILES([Makefile
+     cf-upgrade/Makefile
+     cf-runagent/Makefile
+     cf-serverd/Makefile
+-    ext/Makefile
+     examples/Makefile
+     tests/Makefile
+     tests/acceptance/Makefile
