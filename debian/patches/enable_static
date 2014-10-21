@@ -1,0 +1,14 @@
+Index: Cfengine-debian/tests/unit/Makefile.am
+===================================================================
+--- Cfengine-debian.orig/tests/unit/Makefile.am
++++ Cfengine-debian/tests/unit/Makefile.am
+@@ -177,8 +177,7 @@ if !BUILTIN_EXTENSIONS
+ 
+     check_LTLIBRARIES += cfengine-enterprise.la
+     cfengine_enterprise_la_SOURCES = enterprise_extension_test_lib.c
+-    cfengine_enterprise_la_LDFLAGS = $(AM_LDFLAGS) \
+-	-avoid-version -module -shared -export-dynamic -rpath /
++    cfengine_enterprise_la_LDFLAGS = $(AM_LDFLAGS)
+     EXTRA_enterprise_extension_test_DEPENDENCIES = cfengine-enterprise.la
+ endif
+ 
