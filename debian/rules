@@ -61,8 +61,10 @@ override_dh_install:
 	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
 
 	# libpromises3 package.
-	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so* \
+	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so.* \
                 $(CURDIR)/debian/libpromises3/usr/lib
+	# Get rid of the symlink, no other program will be able to build on this library.
+	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so
 	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/lib
 
 	## Man pages are created with an undocumented flag
