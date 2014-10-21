@@ -4,9 +4,6 @@
 %:
 	dh $@ --with quilt
 
-# --enable-shared=no \
-# --disable-shared \
-
 override_dh_auto_configure:
 	dh_autoreconf
 	./configure 	--prefix=/usr \
