@@ -1,13 +1,13 @@
-Index: Cfengine-debian/libpromises/generic_agent.c
+Index: Cfengine-debian/libutils/man.c
 ===================================================================
---- Cfengine-debian.orig/libpromises/generic_agent.c
-+++ Cfengine-debian/libpromises/generic_agent.c
-@@ -1236,7 +1236,7 @@ void GenericAgentWriteHelp(Writer *w, co
+--- Cfengine-debian.orig/libutils/man.c
++++ Cfengine-debian/libutils/man.c
+@@ -134,7 +134,7 @@ static void WriteOptions(Writer *out, co
      {
          if (options[i].has_arg)
          {
--            WriterWriteF(w, "  --%-12s, -%c value - %s\n", options[i].name, (char) options[i].val, hints[i]);
-+            WriterWriteF(w, "  --%-12s, -%c - %s\n", options[i].name, (char) options[i].val, hints[i]);
+-            WriterWriteF(out, ".IP \"--%s, -%c\" value\n%s\n", options[i].name, (char) options[i].val, option_hints[i]);
++            WriterWriteF(out, ".IP \"--%s, -%c\" \n%s\n", options[i].name, (char) options[i].val, option_hints[i]);
          }
          else
          {
