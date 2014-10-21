@@ -1,12 +1,14 @@
 cfengine3 (3.6.2-1) unstable; urgency=low
 
   * New upstream release
-    + most of the work done by Brian Bennett.
+    + big thanks to Brian Bennett and debian-team@cfengine.com!
   * debian/control:
-    + added libpromises3 as output of the build process.
+    + added libpromises3 as output of the build process
     + Standards-Version updated to 3.9.6
   * debian/rules:
-    + got rid of the info and html docs, they are not shipped anymore.
+    + got rid of the info and html docs, they are not shipped anymore
+  * debian/patches:
+    + major cleanup done, some patches adapted to the new code
 
  -- Antonio Radici <antonio@debian.org>  Tue, 21 Oct 2014 14:49:40 +0000
 
