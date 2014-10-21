@@ -6,7 +6,7 @@
 
 override_dh_auto_configure:
 	dh_autoreconf
-	./configure --enable-shared=yes \
+	./configure --enable-shared=no \
 				--prefix=/usr \
 				--with-sql=yes \
 				--with-mysql \
