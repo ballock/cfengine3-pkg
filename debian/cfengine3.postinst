@@ -48,7 +48,7 @@ move_inputs_if_needed() {
     
     # Also warn the user by creating a file; this news is also advertised in NEWS.Debian.
     FILE_WARNING="/etc/cfengine3/README_inputs_now_in_var_lib"
-    if [ "$INPUTS_MOVED" -eq 1 && ! -f "$FILE_WARNING" ]; then
+    if [ "$INPUTS_MOVED" -eq 1 -a ! -f "$FILE_WARNING" ]; then
         echo "Since 3.6.2, the authoritative input files are now in /var/lib/cfengine3/inputs." >> $FILE_WARNING
         echo "Existing input files at the time of the upgrade were copied over to that dir." >> $FILE_WARNING
         echo "Feel free to remove the input files in /etc/cfengine3 if needed." >> $FILE_WARNING
