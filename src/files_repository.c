@@ -43,7 +43,6 @@ int ArchiveToRepository(char *file,struct Attributes attr,struct Promise *pp)
   char node[CF_BUFSIZE];
   struct stat sb, dsb;
   char *sp;
-  short imagecopy;
 
 if (attr.repository == NULL && VREPOSITORY == NULL)
    {
@@ -92,7 +91,7 @@ strncpy(destination,localrepository,CF_BUFSIZE-2);
 
 if (!JoinPath(destination,node))
    {
-   CfOut(cf_error,"","Buffer overflow for long filename\n");
+   CfOut(cf_error,"","Internal limit: Buffer ran out of space for long filename\n");
    return false;
    }
 

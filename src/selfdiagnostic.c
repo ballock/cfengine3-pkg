@@ -39,8 +39,7 @@ void CfDebugBreak(void);
 
 void SelfDiagnostic()
 
-{ int intval,s1,s2,i,j;
-  char *def;
+{ int s1,s2,i,j;
  
 if (VERBOSE || DEBUG)
    {
@@ -59,7 +58,7 @@ printf("----------------------------------------------------------\n");
 printf("Cfengine - Level 1 self-diagnostic \n");
 printf("----------------------------------------------------------\n\n");
 
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
 s1 = Nova_SizeCfSQLContainer();
 s2 = SizeCfSQLContainer();
 
@@ -205,7 +204,6 @@ for (i = 0; CF_FNCALL_TYPES[i].name != NULL; i++)
 void TestExpandPromise()
 
 { struct Promise pp = {0},*pcopy;
-  struct Body *bp;
 
 printf("%d. Testing promise duplication and expansion\n",++NR);
 pp.promiser = "the originator";
@@ -252,11 +250,7 @@ DeletePromise(pcopy);
 void TestExpandVariables()
 
 { struct Promise pp = {0},*pcopy;
-  struct Body *bp;
-  int i;
-  char *list_text1 = "a,b,c,d,e,f,g";
-  char *list_text2 = "1,2,3,4,5,6,7";
-  struct Rlist *rp, *args, *listvars = NULL, *scalarvars = NULL;
+  struct Rlist *args, *listvars = NULL, *scalarvars = NULL;
   struct Constraint *cp;
   struct FnCall *fp;
 
@@ -347,8 +341,7 @@ ExpandPromiseAndDo(cf_common,"diagnostic",pcopy,scalarvars,listvars,NULL);
 
 void TestRegularExpressions()
 
-{ struct CfRegEx rex;
-  int start,end;
+{ int start,end;
 
 printf("%d. Testing regular expression engine\n",++NR);
 
@@ -359,38 +352,6 @@ printf(" -> Regex engine is the POSIX Regular Expression library\n");
 printf(" -> Some Cfengine are features will not work in this current state.\n");
 printf(" !! This diagnostic might hang if the library is broken\n");
 #endif
-
-rex = CompileRegExp("#.*");
-
-if (rex.failed)
-   {
-   CfOut(cf_error,"","Failed regular expression compilation\n");
-   }
-else
-   {
-   CfOut(cf_error,""," -> Regular expression compilation - ok\n");
-   }
-
-if (!RegExMatchSubString(rex,"line 1:\nline2: # comment to end\nline 3: blablab",&start,&end))
-   {
-   CfOut(cf_error,"","Failed regular expression extraction +1\n");
-   }
-else
-   {
-   CfOut(cf_error,""," -> Regular expression extraction - ok %d - %d\n",start,end);
-   }
-
-/* We have to recompile this for each test - else seg fault - is this a bug? */
-rex = CompileRegExp("#.*");
-
-if (RegExMatchFullString(rex,"line 1:\nline2: # comment to end\nline 3: blablab"))
-   {
-   CfOut(cf_error,"","Failed regular expression extraction -1\n");
-   }
-else
-   {
-   CfOut(cf_error,""," -> Regular expression extraction - ok\n");
-   }
 
 if (FullTextMatch("[a-z]*","1234abcd6789"))
    {
@@ -454,7 +415,7 @@ else
 
 void TestAgentPromises()
 
-{ struct Attributes a = {0};
+{ struct Attributes a = {{0}};
   struct Promise pp = {0};
 
 pp.conlist = NULL;
@@ -487,7 +448,7 @@ void SDIntegerDefault(char *ref,int cmp)
 { char *def;
   int intval;
 
-if (def = GetControlDefault(ref))
+if ((def = GetControlDefault(ref)))
    {
    sscanf(def,"%d",&intval);
    if (intval != cmp)

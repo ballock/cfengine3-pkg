@@ -1,23 +1,27 @@
-/* 
-   Copyright (C) 2008 - Cfengine AS
+/*
+   Copyright (C) Cfengine AS
 
    This file is part of Cfengine 3 - written and maintained by Cfengine AS.
- 
+
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 3, or (at your option) any
-   later version. 
+   Free Software Foundation; version 3.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
   You should have received a copy of the GNU General Public License
-  
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 
+  To the extent this program is licensed as part of the Enterprise
+  versions of Cfengine, the applicable Commerical Open Source License
+  (COSL) may apply to this file if you as a licensee so wish it. See
+  included file COSL.txt.
 */
+
 /*****************************************************************************/
 /*                                                                           */
 /* File: cf3.extern.h                                                        */
@@ -25,6 +29,9 @@
 /* Created: Thu Aug  2 12:51:18 2007                                         */
 /*                                                                           */
 /*****************************************************************************/
+
+#ifndef CFENGINE_CF3_EXTERN_H
+#define CFENGINE_CF3_EXTERN_H
 
 /* See variables in cf3globals.c and syntax.c */
 
@@ -72,6 +79,8 @@ extern struct Item *DONELIST;
 extern struct Rlist *CBUNDLESEQUENCE;
 extern struct Item *ROTATED;
 extern double FORGETRATE;
+extern struct Rlist *GOALS;
+extern struct Rlist *GOALCATEGORIES;
 
 extern struct Rlist *CF_STCK;
 extern int EDIT_MODEL;
@@ -129,9 +138,11 @@ extern char *SHIFT_TEXT[];
 extern char FILE_SEPARATOR;
 extern char FILE_SEPARATOR_STR[2];
 
-extern time_t DATESTAMPS[CF_OBSERVABLES];
 extern char AGGREGATION[CF_BUFSIZE];
 extern char *UNITS[CF_OBSERVABLES];
+
+extern char *BASIC_REPORTS[cfrep_unknown][2];
+extern char *CDP_REPORTS[cdp_unknown][2];
 
 extern char SQL_DATABASE[CF_MAXVARSIZE];
 extern char SQL_OWNER[CF_MAXVARSIZE];
@@ -278,4 +289,6 @@ extern struct BodySyntax CF_MEASURE_BODIES[];
 extern struct SubTypeSyntax CF_SERVICES_SUBTYPES[];
 extern struct BodySyntax CF_SERVMETHOD_BODY[];
 extern struct BodySyntax CF_SERVICES_BODIES[];
+#endif
+
 #endif

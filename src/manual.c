@@ -52,9 +52,8 @@ void TexinfoManual(char *mandir)
 { char filename[CF_BUFSIZE];
   struct SubTypeSyntax *st;
   struct Item *done = NULL;
-  char *thischapter = NULL;
   FILE *fout;
-  int i,j;
+  int i;
 
 snprintf(filename,CF_BUFSIZE-1,"%scf3-Reference.texinfo",BUILD_DIR);
 
@@ -213,7 +212,7 @@ fprintf(fout,
         "@title Cfengine Reference Manual\n"
         "@subtitle Auto generated, self-healing knowledge\n"
         "@subtitle Documentation for core version %s\n"
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
         "@subtitle %s\n"
 #endif
         "@author cfengine.com\n"
@@ -257,7 +256,7 @@ fprintf(fout,
         "@contents\n"
         "@end iftex\n",
         VERSION
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
         ,
         Nova_StrVersion()
 #endif
@@ -310,7 +309,7 @@ void TexinfoFooter(FILE *fout)
 
 void TexinfoPromiseTypesFor(FILE *fout,struct SubTypeSyntax *st)
 
-{ int i,j;
+{ int j;
   char filename[CF_BUFSIZE];
 
 /* Each array element is SubtypeSyntax representing an agent-promise assoc */
@@ -372,11 +371,11 @@ for (i = 0; bs[i].lval != NULL; i++)
       fprintf(fout,"\n\n@node %s in %s\n@subsection @code{%s}\n@noindent @b{Type}: %s\n\n",bs[i].lval,context,bs[i].lval,CF_DATATYPES[bs[i].dtype]);
       TexinfoShowRange(fout,(char *)bs[i].range,bs[i].dtype);
 
-      if (res = GetControlDefault(bs[i].lval))
+      if ((res = GetControlDefault(bs[i].lval)))
          {
          fprintf(fout,"@noindent @b{Default value:} %s\n",res);
          }
-      else if (res = GetBodyDefault(bs[i].lval))
+      else if ((res = GetBodyDefault(bs[i].lval)))
          {
          fprintf(fout,"@noindent @b{Default value:} %s\n",res);
          }
@@ -459,9 +458,9 @@ if (strcmp(scope,"mon") == 0)
 
 void TexinfoShowRange(FILE *fout,char *s,enum cfdatatype type)
 
-{ char *sp;
-  struct Rlist *list = NULL,*rp;
- 
+{
+struct Rlist *list = NULL,*rp;
+
 if (strlen(s) == 0)
    {
    fprintf(fout,"@noindent @b{Allowed input range}: (arbitrary string)\n\n");
@@ -519,11 +518,11 @@ for (i = 0; bs[i].lval != NULL; i++)
       TexinfoShowRange(fout,(char *)bs[i].range,bs[i].dtype);
       fprintf(fout,"\n@noindent @b{Synopsis}: %s\n\n",bs[i].description);
 
-      if (res = GetControlDefault(bs[i].lval))
+      if ((res = GetControlDefault(bs[i].lval)))
          {
          fprintf(fout,"\n@noindent @b{Default value:} %s\n",res);
          }
-      else if (res = GetBodyDefault(bs[i].lval))
+      else if ((res = GetBodyDefault(bs[i].lval)))
          {
          fprintf(fout,"\n@noindent @b{Default value:} %s\n",res);
          }
@@ -561,8 +560,10 @@ if (cfstat(filename,&sb) == -1)
       return;
       }
 
-#ifdef HAVE_LIBCFNOVA
-   fprintf(fp,"\n@i{History}: Was introduced in version %s,Nova %s (%s)\n\n",VERSION,Nova_GetVersion(),VYEAR);
+#ifdef HAVE_CONSTELLATION
+   fprintf(fp,"\n@i{History}: Was introduced in version %s, Nova %s, Constellation %s (%s)\n\n",VERSION,Nova_GetVersion(),Constellation_GetVersion(),VYEAR);
+#elif HAVE_NOVA
+   fprintf(fp,"\n@i{History}: Was introduced in version %s, Nova %s (%s)\n\n",VERSION,Nova_GetVersion(),VYEAR);
 #endif
    fprintf(fp,"\n@verbatim\n\nFill me in (%s)\n\"\"\n@end verbatim\n",filename);
    fclose(fp);

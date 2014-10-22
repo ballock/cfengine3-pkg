@@ -104,11 +104,10 @@ int FileHashChanged(char *filename,unsigned char digest[EVP_MAX_MD_SIZE+1],int w
    to the database. Returns true if hashes do not match and also potentially
    updates database to the new value */
 
-{ struct stat stat1, stat2;
-  int i,needupdate = false, size = 21;
-  unsigned char dbdigest[EVP_MAX_MD_SIZE+1],dbattr[EVP_MAX_MD_SIZE+1];
+{
+  int i,size = 21;
+  unsigned char dbdigest[EVP_MAX_MD_SIZE+1];
   CF_DB *dbp;
-  FILE *fp;
 
 Debug("HashChanged: key %s (type=%d) with data %s\n",filename,type,HashPrint(type,digest));
 
@@ -154,7 +153,7 @@ if (ReadHash(dbp,type,filename,dbdigest))
             }
 	 else
 	   {
-	   cfPS(warnlevel,CF_FAIL,"",pp,attr,"!! Hash for file %s changed from %s to %s",filename,HashPrint(type,dbdigest),HashPrint(type,digest));
+	   cfPS(warnlevel,CF_FAIL,"",pp,attr,"!! Hash for file \"%s\" changed",filename);
 	   }
          
 	 CloseDB(dbp);
@@ -284,7 +283,7 @@ else
    
    EVP_DigestInit(&context,md);
 
-   while (len = fread(buffer,1,1024,file))
+   while ((len = fread(buffer,1,1024,file)))
       {
       EVP_DigestUpdate(&context,buffer,len);
       }
@@ -328,7 +327,6 @@ void HashString(char *buffer,int len,unsigned char digest[EVP_MAX_MD_SIZE+1],enu
 
 { EVP_MD_CTX context;
   const EVP_MD *md = NULL;
-  char *file_buffer;
   int md_len;
 
 Debug2("HashString(%c)\n",type);
@@ -361,7 +359,6 @@ void HashPubKey(RSA *key,unsigned char digest[EVP_MAX_MD_SIZE+1],enum cfhashes t
 
 { EVP_MD_CTX context;
   const EVP_MD *md = NULL;
-  char *file_buffer;
   int md_len,i,buf_len, actlen;
   unsigned char *buffer;
 
@@ -443,9 +440,26 @@ return true;
 /*********************************************************************/
 
 char *HashPrint(enum cfhashes type,unsigned char digest[EVP_MAX_MD_SIZE+1])
-
-{ unsigned int i;
+/** 
+ * WARNING: Not thread-safe (returns pointer to global memory).
+ * Use HashPrintSafe for a thread-safe equivalent
+ */
+{
   static char buffer[EVP_MAX_MD_SIZE*4];
+  
+  HashPrintSafe(type,digest,buffer);
+
+  return buffer;
+}    
+
+/*********************************************************************/
+
+char *HashPrintSafe(enum cfhashes type,unsigned char digest[EVP_MAX_MD_SIZE+1], char buffer[EVP_MAX_MD_SIZE*4])
+/**
+ * Thread safe. Note the buffer size.
+ */
+{
+ unsigned int i;
 
 switch (type)
    {
@@ -462,8 +476,8 @@ for (i = 0; i < CF_DIGEST_SIZES[type]; i++)
    sprintf((char *)(buffer+4+2*i),"%02x", digest[i]);
    }
 
-return buffer; 
-}    
+return buffer;   
+}
 
 /***************************************************************/
 
@@ -474,7 +488,7 @@ void PurgeHashes(char *path,struct Attributes attr,struct Promise *pp)
 { CF_DB *dbp;
   CF_DBC *dbcp;
   struct stat statbuf;
-  int ret,ksize,vsize;
+  int ksize,vsize;
   char *key;
   void *value;
 
@@ -656,7 +670,6 @@ return CF_DIGEST_TYPES[id][0];
 
 int FileHashSize(enum cfhashes id)
 
-{ int i,size = 0;
- 
+{
 return CF_DIGEST_SIZES[id];
 }

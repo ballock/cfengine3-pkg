@@ -86,12 +86,6 @@ void SetEnvironment(char *s);
 extern struct BodySyntax CFA_CONTROLBODY[];
 extern struct Rlist *SERVERLIST;
 
-#ifdef HAVE_LIBVIRT
-# include <libvirt/libvirt.h>
-# include <libvirt/virterror.h>
-extern virConnectPtr CFVC[];
-#endif
-
 /*******************************************************************/
 /* Command line options                                            */
 /*******************************************************************/
@@ -142,15 +136,16 @@ extern virConnectPtr CFVC[];
 
 int main(int argc,char *argv[])
 
-{ struct stat sar;
-
+{
 CheckOpts(argc,argv);
 GenericInitialize(argc,argv,"agent");
 PromiseManagement("agent");
 ThisAgentInit();
 KeepPromises();
 NoteClassUsage(VHEAP);
-NoteVarUsage();
+#ifdef HAVE_NOVA
+Nova_NoteVarUsageDB();
+#endif
 UpdateLastSeen();
 PurgeLocks();
 GenericDeInitialize();
@@ -165,7 +160,6 @@ void CheckOpts(int argc,char **argv)
 
 { extern char *optarg;
  char arg[CF_BUFSIZE],*sp;
-  struct Item *actionList;
   int optindex = 0;
   int c,alpha = false,v6 = false;
 
@@ -380,6 +374,7 @@ void KeepControlPromises()
 { struct Constraint *cp;
   char rettype;
   void *retval;
+  struct Rlist *rp;
 
 for (cp = ControlBodyConstraints(cf_agent); cp != NULL; cp=cp->next)
    {
@@ -434,7 +429,7 @@ for (cp = ControlBodyConstraints(cf_agent); cp != NULL; cp=cp->next)
 
       if (VERBOSE)
          {
-         printf("%s SET refresh_processes when starting: ",VPREFIX);
+         printf("%s> SET refresh_processes when starting: ",VPREFIX);
 
          for (rp  = (struct Rlist *) retval; rp != NULL; rp = rp->next)
             {
@@ -455,9 +450,13 @@ for (cp = ControlBodyConstraints(cf_agent); cp != NULL; cp=cp->next)
       
       for (rp  = (struct Rlist *) retval; rp != NULL; rp = rp->next)
          {
-         if (!IsItemIn(ABORTHEAP,rp->item))
+         char name[CF_MAXVARSIZE] = "";
+         strncpy(name, rp->item, CF_MAXVARSIZE - 1);
+         CanonifyNameInPlace(name);
+
+         if (!IsItemIn(ABORTHEAP,name))
             {
-            AppendItem(&ABORTHEAP,rp->item,cp->classes);
+            AppendItem(&ABORTHEAP,name,cp->classes);
             }
          }
       
@@ -471,9 +470,13 @@ for (cp = ControlBodyConstraints(cf_agent); cp != NULL; cp=cp->next)
       
       for (rp  = (struct Rlist *) retval; rp != NULL; rp = rp->next)
          {
-         if (!IsItemIn(ABORTBUNDLEHEAP,rp->item))
+         char name[CF_MAXVARSIZE] = "";
+         strncpy(name, rp->item, CF_MAXVARSIZE - 1);
+         CanonifyNameInPlace(name);
+
+         if (!IsItemIn(ABORTBUNDLEHEAP,name))
             {
-            AppendItem(&ABORTBUNDLEHEAP,rp->item,cp->classes);
+            AppendItem(&ABORTBUNDLEHEAP,name,cp->classes);
             }
          }
       
@@ -610,6 +613,18 @@ for (cp = ControlBodyConstraints(cf_agent); cp != NULL; cp=cp->next)
       continue;
       }
 
+   if (strcmp(cp->lval,CFA_CONTROLBODY[cfa_suspiciousnames].lval) == 0)
+      {
+
+      for (rp  = (struct Rlist *) retval; rp != NULL; rp = rp->next)
+	{
+	PrependItem(&SUSPICIOUSLIST,rp->item,NULL);
+	CfOut(cf_verbose,"", "-> Concidering %s as suspicious file", rp->item);
+	}
+
+      continue;
+      }
+
    if (strcmp(cp->lval,CFA_CONTROLBODY[cfa_repchar].lval) == 0)
       {
       REPOSCHAR = *(char *)retval;
@@ -708,7 +723,7 @@ if (GetVariable("control_common",CFG_CONTROLBODY[cfg_syslog_host].lval,&retval,&
    CfOut(cf_verbose,"","SET syslog_host to %s",SYSLOGHOST);
    }
 
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
 Nova_Initialize();
 #endif
 }
@@ -790,7 +805,7 @@ if (!ok)
 
 if (VERBOSE || DEBUG)
    {
-   printf("%s -> Bundlesequence => ",VPREFIX);
+   printf("%s> -> Bundlesequence => ",VPREFIX);
    ShowRval(stdout,retval,rettype);
    printf("\n");
    }
@@ -889,8 +904,7 @@ void CheckAgentAccess(struct Rlist *list)
 {
 }
 #else  /* NOT MINGW */
-{ char id[CF_MAXVARSIZE];
-  struct passwd *pw;
+{
   struct Rlist *rp,*rp2;
   struct stat sb;
   uid_t uid;
@@ -1098,23 +1112,16 @@ if (putenv(s) != 0)
 
 int NewTypeContext(enum typesequence type)
 
-{ int maxconnections,i;
-  struct Item *procdata = NULL;
-  char *psopts = GetProcessOptions();
-
+{
 // get maxconnections
 
 switch(type)
    {
    case kp_environments:
-
-#ifdef HAVE_LIBVIRT
-       for (i = 0; i < cfv_none; i++)
-          {
-          CFVC[i] = NULL;
-          }
+#ifdef HAVE_NOVA
+      Nova_NewEnvironmentsContext();
 #endif
-       break;
+      break;
        
    case kp_files:
 
@@ -1123,7 +1130,7 @@ switch(type)
 
    case kp_processes:
      
-       if (!LoadProcessTable(&PROCESSTABLE,psopts))
+       if (!LoadProcessTable(&PROCESSTABLE))
           {
           CfOut(cf_error,"","Unable to read the process table - cannot keep process promises\n","");
           return false;
@@ -1155,8 +1162,7 @@ void DeleteTypeContext(enum typesequence type)
 
 { struct Rlist *rp;
   struct ServerItem *svp;
-  struct Attributes a = {0};
-  int i;
+  struct Attributes a = {{0}};
  
 switch(type)
    {
@@ -1165,18 +1171,10 @@ switch(type)
        break;
 
    case kp_environments:
-
-#ifdef HAVE_LIBVIRT
-       for (i = 0; i < cfv_none; i++)
-          {
-          if (CFVC[i] != NULL)
-             {
-             virConnectClose(CFVC[i]);
-             CFVC[i] = NULL;
-             }
-          }
+#ifdef HAVE_NOVA
+      Nova_DeleteEnvironmentsContext();
 #endif
-       break;
+      break;
 
    case kp_files:
 

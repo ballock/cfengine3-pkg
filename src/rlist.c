@@ -172,7 +172,7 @@ void *CopyRvalItem(void *item, char type)
 { struct Rlist *rp,*srp,*start = NULL;
   struct FnCall *fp;
   void *new,*rval;
-  char rtype = CF_SCALAR,output[CF_BUFSIZE];
+  char rtype = CF_SCALAR;
   char naked[CF_BUFSIZE];
   
 Debug("CopyRvalItem(%c)\n",type);
@@ -343,7 +343,6 @@ return true;
 struct Rlist *CopyRlist(struct Rlist *list)
 
 { struct Rlist *rp,*start = NULL;
-  struct FnCall *fp;
 
 Debug("CopyRlist()\n");
   
@@ -506,7 +505,6 @@ struct Rlist *AppendRlist(struct Rlist **start,void *item, char type)
     
 { struct Rlist *rp,*lp = *start;
   struct FnCall *fp;
-  char *sp = NULL;
 
 switch(type)
    {
@@ -587,7 +585,6 @@ struct Rlist *PrependRlist(struct Rlist **start,void *item, char type)
     
 { struct Rlist *rp,*lp = *start;
   struct FnCall *fp;
-  char *sp = NULL;
 
 switch(type)
    {
@@ -655,8 +652,6 @@ struct Rlist *OrthogAppendRlist(struct Rlist **start,void *item, char type)
    /* Allocates new memory for objects - careful, could leak!  */
     
 { struct Rlist *rp,*lp;
-  struct FnCall *fp;
-  char *sp = NULL;
   struct CfAssoc *cp;
   
 Debug("OrthogAppendRlist\n");
@@ -736,7 +731,6 @@ splitlist = SplitStringAsRList(string,',');
 
 for (rp =  splitlist; rp != NULL; rp = rp->next)
    {
-   value[0];
    sscanf(rp->item,"%*[{ '\"]%255[^'\"]",value);
    AppendRlist(&newlist,value,CF_SCALAR);
    }
@@ -772,42 +766,26 @@ fprintf(fp,"}");
 int PrintRlist(char *buffer,int bufsize,struct Rlist *list)
 
 { struct Rlist *rp;
-  int size = 0;
 
-buffer[0] = '\0';
- 
-if (bufsize < CF_SMALLBUF)
-   {
-   CfOut(cf_error,""," !! Buffer too small");
-   return 0;
-   }
-  
-strcat(buffer,"{");
+StartJoin(buffer,"{",bufsize);
  
 for (rp = list; rp != NULL; rp=rp->next)
    {
-   strcat(buffer,"\'");
+   Join(buffer,"\'",bufsize);
    
    PrintRval(buffer,bufsize,rp->item,rp->type);
 
-   strcat(buffer,"\'");
+   Join(buffer,"\'",bufsize);
    
    if (rp->next != NULL)
       {
-      strcat(buffer,",");
-      }
-
-   size = strlen(buffer);
-   
-   if (size > bufsize - CF_BUFFERMARGIN)
-      {
-      strcat(buffer,"... ");
-      break;
+      Join(buffer,",",bufsize);
       }
    }
 
-strcat(buffer,"}");
-return size;
+EndJoin(buffer,"}",bufsize);
+
+return true;
 }
 
 /*******************************************************************/
@@ -873,8 +851,6 @@ return true;
 
 int StripListSep(char *strList, char *outBuf, int outBufSz)
 {
-  char *sp;
-
   memset(outBuf,0,outBufSz);
 
   if(EMPTY(strList))
@@ -902,8 +878,7 @@ int StripListSep(char *strList, char *outBuf, int outBufSz)
 
 int PrintRval(char *buffer,int bufsize,void *rval,char type)
 
-{ int size = 0,delta = 0;
-
+{
 if (rval == NULL)
    {
    return 0;
@@ -912,27 +887,15 @@ if (rval == NULL)
 switch (type)
    {
    case CF_SCALAR:
-
-       delta += strlen(rval);
-       
-       if (strlen(buffer) + delta < bufsize - CF_BUFFERMARGIN)
-          {
-          strcat(buffer,(char *)rval);
-          size += delta;
-          }
-       else
-          {
-          strcat(buffer,"...");
-          size += 3;
-          }
+       Join(buffer,(char *)rval,bufsize);
        break;
        
    case CF_LIST:
-       size += PrintRlist(buffer,bufsize,(struct Rlist *)rval);
+       PrintRlist(buffer,bufsize,(struct Rlist *)rval);
        break;
        
    case CF_FNCALL:
-       size += PrintFnCall(buffer,bufsize,(struct FnCall *)rval);
+       PrintFnCall(buffer,bufsize,(struct FnCall *)rval);
        break;
 
    case CF_NOPROMISEE:
@@ -940,15 +903,14 @@ switch (type)
        break;
    }
 
-return size;
+return true;
 }
 
 /*******************************************************************/
 
 void ShowRlistState(FILE *fp,struct Rlist *list)
 
-{ struct Rlist *rp;
-
+{
 ShowRval(fp,list->state_ptr->item,list->type);
 }
 
@@ -1125,7 +1087,7 @@ struct Rlist *PrependRlistAlien(struct Rlist **start,void *item)
 
    /* Allocates new memory for objects - careful, could leak!  */
     
-{ struct Rlist *rp,*lp = *start;
+{ struct Rlist *rp;
 
 ThreadLock(cft_lock); 
 
@@ -1209,7 +1171,7 @@ struct Rlist *SplitStringAsRList(char *string,char sep)
     escaping separators, e.g. \, */
 
 { struct Rlist *liststart = NULL;
-  char format[9], *sp;
+  char *sp;
   char node[CF_MAXVARSIZE];
   int maxlen = strlen(string);
   
@@ -1245,9 +1207,9 @@ struct Rlist *SplitRegexAsRList(char *string,char *regex,int max,int blanks)
     into a linked list of separate items, */
 
 { struct Rlist *liststart = NULL;
-  char format[9], *sp;
+  char *sp;
   char node[CF_MAXVARSIZE];
-  int start,end,b = 0;
+  int start,end;
   int delta, count = 0;
 
 if (string == NULL)

@@ -96,7 +96,56 @@ return NULL;
 
 /*********************************************************************/
 
-int IsItemIn(struct Item *list,char *item)
+struct Item *ReturnItemInClass(struct Item *list,char *item,char *classes)
+
+{ struct Item *ptr; 
+
+if ((item == NULL) || (strlen(item) == 0))
+   {
+   return NULL;
+   }
+ 
+for (ptr = list; ptr != NULL; ptr=ptr->next)
+   {
+   if (strcmp(ptr->name,item) == 0 && strcmp(ptr->classes,classes) == 0)
+      {
+      return ptr;
+      }
+   }
+ 
+return NULL;
+}
+
+/*********************************************************************/
+
+int GetItemIndex(struct Item *list,char *item)
+/*
+ * Returns index of first occurence of item.
+ */
+{ struct Item *ptr; 
+  int i = 0;
+
+if ((item == NULL) || (strlen(item) == 0))
+   {
+   return -1;
+   }
+ 
+for (ptr = list; ptr != NULL; ptr=ptr->next)
+   {
+   if (strcmp(ptr->name,item) == 0)
+      {
+      return i;
+      }
+
+   i++;
+   }
+ 
+return -1;
+}
+
+/*********************************************************************/
+
+int IsItemIn(struct Item *list,const char *item)
 
 { struct Item *ptr; 
 
@@ -149,14 +198,38 @@ return false;
 
 /*********************************************************************/
 
-void IdempPrependItem(struct Item **liststart,char *itemstring,char *classes)
+struct Item *IdempPrependItem(struct Item **liststart,char *itemstring,char *classes)
 
-{
-if (!IsItemIn(*liststart,itemstring))
+{ struct Item *ip;
+
+ip = ReturnItemIn(*liststart,itemstring);
+
+if (ip)
    {
-   PrependItem(liststart,itemstring,classes);
+   return ip;
    }
+
+PrependItem(liststart,itemstring,classes);
+return *liststart;
 }
+
+/*********************************************************************/
+
+struct Item *IdempPrependItemClass(struct Item **liststart,char *itemstring,char *classes)
+
+{ struct Item *ip;
+
+ip = ReturnItemInClass(*liststart,itemstring,classes);
+
+if (ip)  // already exists
+   {
+   return ip;
+   }
+
+PrependItem(liststart,itemstring,classes);
+return *liststart;
+}
+
 
 /*********************************************************************/
 
@@ -164,7 +237,7 @@ void IdempItemCount(struct Item **liststart,char *itemstring,char *classes)
 
 { struct Item *ip;
  
-if (ip = ReturnItemIn(*liststart,itemstring))
+if ((ip = ReturnItemIn(*liststart,itemstring)))
    {
    ip->counter++;
    }
@@ -189,7 +262,7 @@ if (!IsItemIn(*liststart,itemstring))
 
 /*********************************************************************/
 
-struct Item * PrependItem(struct Item **liststart,char *itemstring,char *classes)
+struct Item *PrependItem(struct Item **liststart,char *itemstring,char *classes)
 
 { struct Item *ip;
   char *sp,*spe = NULL;
@@ -213,6 +286,7 @@ strcpy(sp,itemstring);
 ip->name = sp;
 ip->next = *liststart;
 ip->counter = 0;
+ip->time = 0;
 *liststart = ip;
 
 if (classes != NULL)
@@ -359,11 +433,8 @@ return count;
 int RawSaveItemList(struct Item *liststart,char *file)
 
 { struct Item *ip;
-  struct stat statbuf;
   char new[CF_BUFSIZE],backup[CF_BUFSIZE];
   FILE *fp;
-  mode_t mask;
-  char stamp[CF_BUFSIZE]; 
   time_t STAMPNOW;
   STAMPNOW = time((time_t *)NULL);
 
@@ -553,6 +624,46 @@ if (ip_last)
 return false;
 }
 
+/*********************************************************************/ 
+
+int MatchRegion(char *chunk,struct Item *location,struct Item *begin,struct Item *end)
+
+{ struct Item *ip = location;
+  char *sp,buf[CF_BUFSIZE];
+
+for (sp = chunk; sp <= chunk+strlen(chunk); sp++)
+   {
+   memset(buf,0,CF_BUFSIZE);
+   sscanf(sp,"%[^\n]",buf);
+   sp += strlen(buf);
+
+   if (!FullTextMatch(buf,ip->name))
+      {
+      return false;
+      }
+   
+   if (ip == end)
+      {
+      return false;
+      }
+
+   if (ip->next)
+      {
+      ip = ip->next;
+      }
+   else
+      {
+      if (++sp <= chunk+strlen(chunk))
+         {
+         return false;
+         }
+      
+      break;
+      }
+   }
+
+return true;
+}
 
 /*********************************************************************/
 /* Level                                                             */
@@ -561,7 +672,6 @@ return false;
 void InsertAfter(struct Item **filestart,struct Item *ptr,char *string)
 
 { struct Item *ip;
-  char *sp;
 
 if (*filestart == NULL || ptr == CF_UNDEFINED_ITEM)
    {
@@ -928,7 +1038,14 @@ void DebugListItemList(struct Item *liststart)
 
 for (ptr = liststart; ptr != NULL; ptr=ptr->next)
    {
-   printf("CFDEBUG: [%s]\n",ptr->name);
+   if (ptr->classes)
+      {
+      printf("CFDEBUG: %s::[%s]\n",ptr->classes,ptr->name);
+      }
+   else
+      {
+      printf("CFDEBUG: [%s]\n",ptr->name);
+      }
    }
 }
 
@@ -1037,8 +1154,6 @@ int DeleteItemGeneral(struct Item **list,char *string,enum matchtypes type)
 
 { struct Item *ip,*last = NULL;
   int match = 0, matchlen = 0;
-  regex_t rx,rxcache;
-  regmatch_t pmatch;
 
 if (list == NULL)
    {
@@ -1085,7 +1200,6 @@ switch (type)
        case NOTregexComplete:
        case regexComplete:
            /* To fix a bug on some implementations where rx gets emptied */
-           memcpy(&rx,&rxcache,sizeof(rx));
            match = FullTextMatch(string,ip->name);
            
            if (type == NOTregexComplete)
@@ -1198,11 +1312,9 @@ int CompareToFile(struct Item *liststart,char *file,struct Attributes a,struct P
 
 /* returns true if file on disk is identical to file in memory */
 
-{ FILE *fp;
+{
   struct stat statbuf;
-  struct Item *ip = liststart,*cmplist = NULL;
-  unsigned char *finmem = NULL, fdata;
-  unsigned long fip = 0, tmplen, idx;
+  struct Item *cmplist = NULL;
 
 Debug("CompareToFile(%s)\n",file);
 

@@ -164,9 +164,11 @@ snprintf(cflast,CF_BUFSIZE,"last.%.100s.%s.%.100s_%d_%s",pp->bundle,cc_operator,
 
 Debug("LOCK(%s)[%s]\n",pp->bundle,cflock);
 
-/* for signal handler - not threadsafe so applies only to main thread */
+// Now see if we can get exclusivity to edit the locks
 
 CFINITSTARTTIME = time(NULL);
+
+WaitForCriticalSection();
 
 /* Look for non-existent (old) processes */
 
@@ -175,13 +177,15 @@ elapsedtime = (time_t)(now-lastcompleted) / 60;
 
 if (elapsedtime < 0)
    {
-   CfOut(cf_verbose,""," XX Another cfengine seems to have done this since I started (elapsed=%d)\n",elapsedtime);
+   CfOut(cf_verbose,""," XX Another cf-agent seems to have done this since I started (elapsed=%d)\n",elapsedtime);
+   ReleaseCriticalSection();
    return this;
    }
 
 if (elapsedtime < attr.transaction.ifelapsed)
    {
    CfOut(cf_verbose,""," XX Nothing promised here [%.40s] (%u/%u minutes elapsed)\n",cflock,elapsedtime,attr.transaction.ifelapsed);
+   ReleaseCriticalSection();
    return this;
    }
 
@@ -205,7 +209,7 @@ if (!ignoreProcesses)
             CfOut(cf_error,"","Illegal pid in corrupt lock %s - ignoring lock\n",cflock);
             }
 #ifdef MINGW  // killing processes with e.g. task manager does not allow for termination handling
-         else if(!NovaWin_IsProcessRunning(pid))
+         else if (!NovaWin_IsProcessRunning(pid))
             {
             CfOut(cf_verbose,"","Process with pid %d is not running - ignoring lock (Windows does not support graceful processes termination)\n",pid);
             LogLockCompletion(cflog,pid,"Lock expired, process not running",cc_operator,cc_operand);
@@ -213,33 +217,37 @@ if (!ignoreProcesses)
             }
 #endif  /* MINGW */
          else
-	       {
-               CfOut(cf_verbose,"","Trying to kill expired process, pid %d\n",pid);
-               
-               err = GracefulTerminate(pid);
-               
-               if (err || errno == ESRCH)
-                  {
-                  LogLockCompletion(cflog,pid,"Lock expired, process killed",cc_operator,cc_operand);
-                  unlink(cflock);
-                  }
-               else
-                  {
-                  CfOut(cf_error,"kill","Unable to kill expired cfagent process %d from lock %s, exiting this time..\n",pid,cflock);
-                  
-                  FatalError("");
-                  }
-	       }
-         }
-	 else
             {
-            CfOut(cf_verbose,"","Couldn't obtain lock for %s (already running!)\n",cflock);
-            return this;
+            CfOut(cf_verbose,"","Trying to kill expired process, pid %d\n",pid);
+            
+            err = GracefulTerminate(pid);
+            
+            if (err || errno == ESRCH)
+               {
+               LogLockCompletion(cflog,pid,"Lock expired, process killed",cc_operator,cc_operand);
+               unlink(cflock);
+               }
+            else
+               {
+               ReleaseCriticalSection();
+               CfOut(cf_error,"kill","Unable to kill expired cfagent process %d from lock %s, exiting this time..\n",pid,cflock);
+               
+               FatalError("");
+               }
             }
+         }
+      else
+         {
+         ReleaseCriticalSection();
+         CfOut(cf_verbose,"","Couldn't obtain lock for %s (already running!)\n",cflock);
+         return this;
+         }
       }
    
    WriteLock(cflock);   
    }
+
+ReleaseCriticalSection();
 
 this.lock = strdup(cflock);
 this.last = strdup(cflast);
@@ -432,7 +440,7 @@ mutex = NameToThreadMutex(name);
 if (pthread_mutex_unlock(mutex) != 0)
    {
    // Don't use CfOut here as it also requires locking
-   printf("pthread_mutex_unlock","pthread_mutex_unlock failed");
+   printf("pthread_mutex_unlock: pthread_mutex_unlock failed");
    return false;
    }
 
@@ -684,7 +692,7 @@ if (strlen(s) < strlen("Fri Oct 1 15:15:23 EST 2010"))
 
 for (i = 0; i < 7; i++)
    {
-   if (dayp = strstr(s,days[i]))
+   if ((dayp = strstr(s,days[i])))
       {
       *dayp = 'D';
       *(dayp+1) = 'A';
@@ -695,7 +703,7 @@ for (i = 0; i < 7; i++)
 
 for (i = 0; i < 12; i++)
    {
-   if (monthp = strstr(s,months[i]))
+   if ((monthp = strstr(s,months[i])))
       {
       *monthp = 'M';
       *(monthp+1) = 'O';
@@ -735,8 +743,8 @@ void PurgeLocks()
 
 { CF_DB *dbp = OpenLock();
   CF_DBC *dbcp;
-  char *key,name[CF_BUFSIZE];
-  int i,ksize,vsize;
+  char *key;
+  int ksize,vsize;
   struct LockData entry;
   time_t now = time(NULL);
 
@@ -780,4 +788,33 @@ WriteDB(dbp,"lock_horizon",&entry,sizeof(entry));
 
 DeleteDBCursor(dbp,dbcp);
 CloseLock(dbp);
+}
+
+/************************************************************************/
+/* Release critical section                                             */
+/************************************************************************/
+
+void WaitForCriticalSection()
+
+{ time_t now = time(NULL), then = FindLockTime("CF_CRITICAL_SECTION");
+
+/* Another agent has been waiting more than a minute, it means there
+   is likely crash detritus to clear up... After a minute we take our
+   chances ... */
+ 
+while ((then != -1) && (now - then < 60))
+   {
+   sleep(1);
+   then = FindLockTime("CF_CRITICAL_SECTION");
+   }
+
+WriteLock("CF_CRITICAL_SECTION");
+}
+
+/************************************************************************/
+
+void ReleaseCriticalSection()
+
+{
+RemoveLock("CF_CRITICAL_SECTION");
 }

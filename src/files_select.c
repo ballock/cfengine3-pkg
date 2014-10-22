@@ -35,8 +35,7 @@
 int SelectLeaf(char *path,struct stat *sb,struct Attributes attr,struct Promise *pp)
 
 { struct AlphaList leaf_attr;
-  int result = true, tmpres;
-  char *criteria = NULL;
+  int result = true;
   struct Rlist *rp;
 
 InitAlphaList(&leaf_attr);  
@@ -168,7 +167,7 @@ if (attr.select.exec_program && SelectExecProgram(path,attr.select.exec_program)
    PrependAlphaList(&leaf_attr,"exec_program");
    }
 
-if (result = EvaluateORString(attr.select.result,leaf_attr,0))
+if ((result = EvalFileResult(attr.select.result,&leaf_attr)))
    {
    //NewClassesFromString(fp->defines);
    }
@@ -251,7 +250,7 @@ if (S_ISDOOR(lstatptr->st_mode))
 
 for (rp = crit; rp != NULL; rp=rp->next)
    {
-   if (EvaluateORString((char *)rp->item,leafattrib,0))
+   if (EvalFileResult((char *)rp->item,&leafattrib))
       {
       DeleteAlphaList(&leafattrib);
       return true;
@@ -307,7 +306,7 @@ else
 
 for (rp = crit; rp != NULL; rp = rp->next)
    {
-   if (EvaluateORString((char *)rp->item,leafattrib,0))
+   if (EvalFileResult((char *)rp->item,&leafattrib))
       {
       Debug(" - ? Select owner match\n");
       DeleteAlphaList(&leafattrib);
@@ -433,7 +432,6 @@ return false;
 int SelectExecRegexMatch(char *filename,char *crit,char *prog)
 
 { char line[CF_BUFSIZE];
-  int s,e;
   FILE *pp;
   char buf[CF_MAXVARSIZE];
  
@@ -566,7 +564,7 @@ else
 
 for (rp = crit; rp != NULL; rp = rp->next)
    {
-   if (EvaluateORString((char *)rp->item,leafattrib,0))
+   if (EvalFileResult((char *)rp->item,&leafattrib))
       {
       Debug(" - ? Select group match\n");
       DeleteAlphaList(&leafattrib);

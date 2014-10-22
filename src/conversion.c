@@ -42,7 +42,7 @@ void IPString2KeyDigest(char *ipv4,char *result)
   char name[CF_BUFSIZE];
   void *value;
   struct CfKeyHostSeen entry;
-  int ret,ksize,vsize, ok = false;
+  int ksize,vsize;
   unsigned char digest[EVP_MAX_MD_SIZE+1];
 
 if (strcmp(ipv4,"127.0.0.1") == 0 || strcmp(ipv4,"::1") == 0 || strcmp(ipv4,VIPADDRESS) == 0)
@@ -139,6 +139,77 @@ memset(out,0,outSz);
       }
    }
 
+return out;
+}
+
+/***************************************************************************/
+
+char *EscapeJson(char *s, char *out, int outSz)
+
+{ char *spt,*spf;
+  int i = 0;
+
+memset(out,0,outSz);
+ 
+ for (spf = s, spt = out; (i < outSz - 2) && (*spf != '\0'); spf++,spt++,i++)
+   {
+   switch (*spf)
+      {
+      case '\'':
+      case '\"':
+      case '\\':  
+          *spt++ = '\\';
+          *spt = *spf;
+	  i+=2;
+          break;
+
+      default:
+          *spt = *spf;
+	  i++;
+          break;
+      }
+   }
+
+return out;
+}
+
+/***************************************************************************/
+char *EscapeRegex(char *s, char *out, int outSz)
+
+{ char *spt,*spf;
+  int i = 0;
+
+memset(out,0,outSz);
+ 
+ for (spf = s, spt = out; (i < outSz - 2) && (*spf != '\0'); spf++,spt++,i++)
+   {
+   switch (*spf)
+      {
+      case '\\': 
+      case '.': 
+      case '|':
+      case '*':
+      case '?':
+      case '+':
+      case '(':
+      case ')':
+      case '{':
+      case '}':
+      case '[':
+      case ']':
+      case '^':
+      case '$': 
+          *spt++ = '\\';
+          *spt = *spf;
+	  i+=2;
+          break;
+
+      default:
+          *spt = *spf;
+	  i++;
+          break;
+      }
+   }
 return out;
 }
 
@@ -604,7 +675,7 @@ sscanf(s,"%ld%c%s",&a,&c,remainder);
 
 if (a == CF_NOINT || !IsSpace(remainder))
    {
-   if (THIS_AGENT_TYPE != cf_agent)
+   if (THIS_AGENT_TYPE == cf_common)
       {
       snprintf(output,CF_BUFSIZE,"Error reading assumed integer value \"%s\" => \"%s\" (found remainder \"%s\")\n",s,"non-value",remainder);
       ReportError(output);
@@ -658,30 +729,35 @@ return a;
 
 /****************************************************************************/
 
-long TimeCounter2Int(char *s)
+long TimeCounter2Int(const char *s)
 
-{ long h = CF_NOINT,m = CF_NOINT, r = 0;
-  char output[CF_BUFSIZE];
-  
+{
+long d = 0, h = 0, m = 0;
+char output[CF_BUFSIZE];
+
 if (s == NULL)
    {
    return CF_NOINT;
    }
 
-sscanf(s,"%ld:%ld",&h,&m);
-
-if (h == CF_NOINT || m == CF_NOINT)
+if (strchr(s, '-'))
    {
-   snprintf(output,CF_BUFSIZE,"Error reading assumed time counter value \"%s\"\n",s);
-   ReportError(output);
+   if (sscanf(s, "%ld-%ld:%ld", &d, &h, &m) != 3)
+      {
+      snprintf(output, CF_BUFSIZE, "Unable to parse TIME 'ps' field, expected dd-hh:mm, got '%s'", s);
+      ReportError(output);
+      }
    }
 else
    {
-   /* Returns time in secs */
-   r = 3600 * h + 60 *m;
+   if (sscanf(s, "%ld:%ld", &h, &m) != 2)
+      {
+      snprintf(output, CF_BUFSIZE, "Unable to parse TIME 'ps' field, expected hH:mm, got '%s'", s);
+      ReportError(output);
+      }
    }
 
-return r;
+return 60 * (m + 60 * (h + 24 * d));
 }
 
 /****************************************************************************/
@@ -716,7 +792,7 @@ if (strstr(s,":")) /* Hr:Min */
    }
 else               /* date Month */
    {
-   sscanf(s,"%3[a-zA-Z] %d",mon,&day);
+   sscanf(s,"%3[a-zA-Z] %ld",mon,&day);
 
    month = Month2Int(mon);
    
@@ -727,7 +803,7 @@ else               /* date Month */
       }
    }
 
-Debug("(%s)\n%d=%s,%d=%s,%d,%d,%d\n",s,year,VYEAR,month,VMONTH,day,hour,min);
+Debug("(%s)\n%ld=%s,%ld=%s,%ld,%ld,%ld\n",s,year,VYEAR,month,VMONTH,day,hour,min);
 
 cftime = 0;
 cftime += min * 60;
@@ -750,7 +826,7 @@ return (long) cftime;
 
 long Months2Seconds(int m)
 
-{ time_t cftime;
+{
   static long days[] = {31,28,31,30,31,30,31,31,30,31,30,31};
   long tot_days = 0;
   int this_month,i,month,year;
@@ -819,6 +895,46 @@ for (i = 0; i < 7; i++)
    }
 
 return -1;
+}
+
+/****************************************************************************/
+
+void CtimeHourInterval(time_t t, char *out, int outSz)
+/* 00 - 06, 
+   06 - 12, 
+   12 - 18, 
+   18 - 24*/
+{
+  char buf[CF_MAXVARSIZE];
+  int hr = 0, fromHr = 0, toHr = 0;
+
+  snprintf(buf,sizeof(buf),"%s",cf_ctime(&t));
+  
+  sscanf(buf+11,"%d", &hr);
+  buf[11] = '\0';
+
+  if(hr < 6)
+    {
+      fromHr = 0;
+      toHr = 6;
+    }
+  else if(hr < 12)
+    {
+      fromHr = 6;
+      toHr = 12;
+    }
+  else if(hr < 18)
+    {
+      fromHr = 12;
+      toHr = 18;
+    }
+  else
+    {
+      fromHr = 18;
+      toHr = 24;
+    }
+
+  snprintf(out, outSz, "%s %02d-%02d", buf, fromHr, toHr);
 }
 
 /****************************************************************************/
@@ -1028,6 +1144,55 @@ for (i = 0; i < 3; i++)
 return cfsrv_nostatus;
 }
 
+/*********************************************************************/
+
+enum cfl_view Str2View(char *s)
+
+{ static char *views[] = { "SumCompWk",  // NOTE: must match cfl_view enum
+			   "SumRepairedWk",
+			   "SumNotKeptWk",
+			   "RepairedReason",                           
+			   "NotKeptReason",
+			   NULL };
+  int i;
+
+for (i = 0; views[i] != NULL; i++)
+   {
+   if (strcmp(s,views[i]) == 0)
+      {
+      return i;
+      }
+   }
+
+return cfl_view_error;
+}
+
+/*********************************************************************/
+
+char *Dtype2Str(enum cfdatatype dtype)
+{
+  switch(dtype)
+    {
+    case cf_str:
+      return "s";
+    case cf_slist:
+      return "sl";      
+    case cf_int:
+      return "i";
+    case cf_ilist:
+      return "il";
+    case cf_real:
+      return "r";
+    case cf_rlist:
+      return "rl";
+    case cf_opts:
+      return "m";
+    case cf_olist:
+      return "ml";
+    default:
+      return "D?";
+    }
+}
 
 /*********************************************************************/
 /* Level                                                             */
@@ -1273,6 +1438,24 @@ if (a == CF_NODOUBLE)
 return true;
 }
 
+/********************************************************************/
+
+enum cfd_menu String2Menu(char *s)
+
+{ static char *menus[] = { "delta", "full", "relay", NULL };
+  int i;
+ 
+for (i = 0; menus[i] != NULL; i++)
+   {
+   if (strcmp(s,menus[i]) == 0)
+      {
+      return i;
+      }
+   }
+
+return cfd_menu_error;
+}
+
 /*******************************************************************/
 /* Unix-only functions                                             */
 /*******************************************************************/
@@ -1456,4 +1639,3 @@ else
 return gid;
 }
 #endif  /* NOT MINGW */
-

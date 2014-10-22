@@ -92,7 +92,7 @@ since these cannot be mapped into "this" without some magic.
 
 void ExpandPromise(enum cfagenttype agent,char *scopeid,struct Promise *pp,void *fnptr)
 
-{ struct Rlist *rp, *listvars = NULL, *scalarvars = NULL;
+{ struct Rlist *listvars = NULL, *scalarvars = NULL;
   struct Constraint *cp;
   struct Promise *pcopy;
 
@@ -101,6 +101,8 @@ Debug("* ExpandPromises (scope = %s )\n",scopeid);
 Debug("****************************************************\n\n");
 
 DeleteScope("match"); /* in case we expand something expired accidentially */
+
+THIS_BUNDLE = scopeid;
 
 pcopy = DeRefCopyPromise(scopeid,pp);
 
@@ -130,7 +132,6 @@ DeleteRlist(listvars);
 struct Rval ExpandDanglers(char *scopeid,struct Rval rval,struct Promise *pp)
 
 { struct Rval final;
-  struct Rlist *rp;
 
  /* If there is still work left to do, expand and replace alloc */
  
@@ -203,7 +204,7 @@ switch(type)
 
 void ScanScalar(char *scopeid,struct Rlist **scal,struct Rlist **its,char *string,int level,struct Promise *pp)
 
-{ struct Rlist *rp;
+{
   char *sp,rtype;
   void *rval;
   char v[CF_BUFSIZE],var[CF_EXPANDSIZE],exp[CF_EXPANDSIZE],temp[CF_BUFSIZE];
@@ -297,7 +298,7 @@ return ExpandPrivateScalar(CONTEXTID,string,buffer);
 int ExpandThis(enum cfreport level,char *string,char buffer[CF_EXPANDSIZE])
 
 {
-if (level == cf_error || (strstr(string,"$(this.") == 0) && (strstr(string,"${this.") == 0))
+if (level == cf_error || ((strstr(string,"$(this.") == 0) && (strstr(string,"${this.") == 0)))
    {
    strncpy(buffer,string,CF_EXPANDSIZE-1);
    return true;
@@ -351,9 +352,8 @@ return start;
 struct Rval ExpandPrivateRval(char *scopeid,void *rval,char type)
 
 { char buffer[CF_EXPANDSIZE];
- struct Rlist *rp, *start = NULL;
  struct FnCall *fp,*fpe;
- struct Rval returnval,extra;
+ struct Rval returnval;
      
 Debug("ExpandPrivateRval(scope=%s,type=%c)\n",scopeid,type);
 
@@ -395,9 +395,8 @@ return returnval;
 struct Rval ExpandBundleReference(char *scopeid,void *rval,char type)
 
 { char buffer[CF_EXPANDSIZE];
- struct Rlist *rp, *start = NULL;
  struct FnCall *fp,*fpe;
- struct Rval returnval,extra;
+ struct Rval returnval;
      
 Debug("ExpandBundleReference(scope=%s,type=%c)\n",scopeid,type);
 
@@ -431,14 +430,28 @@ return returnval;
 
 /*********************************************************************/
 
+static int ExpandOverflow(char *str1,char *str2)
+
+{ int len = strlen(str2);
+
+if ((strlen(str1)+len) > (CF_EXPANDSIZE - CF_BUFFERMARGIN))
+   {
+   CfOut(cf_error,"","Expansion overflow constructing string. Increase CF_EXPANDSIZE macro. Tried to add %s to %s\n",str2,str1);
+   return true;
+   }
+
+return false;
+}
+
+/*********************************************************************/
+
 int ExpandPrivateScalar(char *scopeid,char *string,char buffer[CF_EXPANDSIZE]) 
 
 { char *sp,rtype;
   void *rval;
   int varstring = false;
   char currentitem[CF_EXPANDSIZE],temp[CF_BUFSIZE],name[CF_MAXVARSIZE];
-  int len,increment, returnval = true;
-  time_t tloc;
+  int increment, returnval = true;
   
 memset(buffer,0,CF_EXPANDSIZE);
 
@@ -591,10 +604,9 @@ void ExpandPromiseAndDo(enum cfagenttype agent,char *scopeid,struct Promise *pp,
 
 { struct Rlist *lol = NULL; 
   struct Promise *pexp;
-  struct Scope *ptr;
   const int cf_null_cutoff = 5;
   char *handle = GetConstraint("handle",pp,CF_SCALAR),v[CF_MAXVARSIZE];
-  int i = 1, cutoff = 0;
+  int cutoff = 0;
 
 lol = NewIterationContext(scopeid,listvars);
 
@@ -922,7 +934,7 @@ if (count != 0)
    return false;
    }
 
-Debug1("IsNakedVar(%s,%c)!!\n",str,vtype);
+Debug("IsNakedVar(%s,%c)!!\n",str,vtype);
 return true;
 }
 
@@ -951,12 +963,12 @@ strncpy(s2,s1+2,strlen(s1)-3);
 void ConvergeVarHashPromise(char *scope,struct Promise *pp,int allow_redefine)
 
 { struct Constraint *cp,*cp_save = NULL;
-  struct Attributes a = {0};
-  char *lval,rtype,type = 'x';
+  struct Attributes a = {{0}};
+  char rtype,type = 'x',*sp = NULL;
   void *rval = NULL,*retval;
   int i = 0,ok_redefine = false,drop_undefined = false;
   struct Rval returnval; /* Must expand naked functions here for consistency */
-  struct Rlist *rp,*last = NULL;
+  struct Rlist *rp;
   
 if (pp->done)
    {
@@ -964,6 +976,11 @@ if (pp->done)
    }
 
 if (IsExcluded(pp->classes))
+   {
+   return;
+   }
+
+if (VarClassExcluded(pp,&sp))
    {
    return;
    }
@@ -1107,11 +1124,11 @@ if (rval != NULL)
                 break;
             case CF_LIST:
                 CfOut(cf_error,""," !! Redefinition of a constant list \"%s\"",pp->promiser,retval,rval);
-                printf("%s  -- Was ",VPREFIX);
+                printf("%s>  -- Was ",VPREFIX);
                 ShowRlist(stdout,retval);      
-                printf(" now ",VPREFIX);
+                printf("%s> now ",VPREFIX);
                 ShowRlist(stdout,rval);      
-                printf("\n",VPREFIX);
+                printf("%s>\n",VPREFIX);
                 PromiseRef(cf_error,pp);
 		break;
             }

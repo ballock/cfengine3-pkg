@@ -47,9 +47,9 @@ struct BodySyntax CF_TRANSACTION_BODY[] =
    {"log_priority",cf_opts,"emergency,alert,critical,error,warning,notice,info,debug","The priority level of the log message, as interpreted by a syslog server"},
    {"log_repaired",cf_str,CF_LOGRANGE,"This should be filename of a file to which log_string will be saved, if undefined it goes to the system logger"},
    {"log_failed",cf_str,CF_LOGRANGE,"This should be filename of a file to which log_string will be saved, if undefined it goes to the system logger"},
-   {"value_kept",cf_real,"","A real number value attributed to keeping this promise"},
-   {"value_repaired",cf_real,"","A real number value attributed to reparing this promise"},
-   {"value_notkept",cf_real,"","A real number value (possibly negative) attributed to not keeping this promise"},
+   {"value_kept",cf_real,CF_REALRANGE,"A real number value attributed to keeping this promise"},
+   {"value_repaired",cf_real,CF_REALRANGE,"A real number value attributed to reparing this promise"},
+   {"value_notkept",cf_real,CF_REALRANGE,"A real number value (possibly negative) attributed to not keeping this promise"},
    {"audit",cf_opts,CF_BOOL,"true/false switch for detailed audit records of this promise"},
    {"background",cf_opts,CF_BOOL,"true/false switch for parallelizing the promise repair"},
    {"report_level",cf_opts,"inform,verbose,error,log","The reporting level for standard output for this promise"},
@@ -98,9 +98,10 @@ struct BodySyntax CF_CLASSBODY[] =
    {"or",cf_clist,CF_CLASSRANGE,"Combine class sources with inclusive OR"}, 
    {"and",cf_clist,CF_CLASSRANGE,"Combine class sources with AND"},
    {"xor",cf_clist,CF_CLASSRANGE,"Combine class sources with XOR"},
-   {"dist",cf_rlist,CF_REALRANGE,"Generate a probabilistic class distribution (strategy in cfengine 2)"},
+   {"dist",cf_rlist,CF_REALRANGE,"Generate a probabilistic class distribution (from strategies in cfengine 2)"},
    {"expression",cf_class,CF_CLASSRANGE,"Evaluate string expression of classes in normal form"},
    {"not",cf_class,CF_CLASSRANGE,"Evaluate the negation of string expression in normal form"},
+   {"select_class",cf_rlist,CF_CLASSRANGE,"Select one of the named list of classes to define based on host identity"},
    {NULL,cf_notype,NULL,NULL}
    };
 
@@ -164,7 +165,7 @@ struct BodySyntax CFA_CONTROLBODY[] =
    {"sensiblecount",cf_int,CF_VALRANGE,"Minimum number of files a mounted filesystem is expected to have"},
    {"sensiblesize",cf_int,CF_VALRANGE,"Minimum number of bytes a mounted filesystem is expected to have"},
    {"skipidentify",cf_opts,CF_BOOL,"Do not send IP/name during server connection because address resolution is broken"},
-   {"suspiciousnames",cf_slist,"List of names to warn about if found during any file search"},
+   {"suspiciousnames",cf_slist,"","List of names to warn about if found during any file search"},
    {"syslog",cf_opts,CF_BOOL,"true/false switches on output to syslog at the inform level"},
    {"track_value",cf_opts,CF_BOOL,"true/false switches on tracking of promise valuation"},
    {"timezone",cf_slist,"","List of allowed timezones this machine must comply with"},
@@ -201,7 +202,7 @@ struct BodySyntax CFM_CONTROLBODY[] =
    {
    {"forgetrate",cf_real,"0,1","Decimal fraction [0,1] weighting of new values over old in 2d-average computation"},
    {"monitorfacility",cf_opts,CF_FACILITY,"Menu option for syslog facility"},
-   {"histograms",cf_opts,CF_BOOL,"true/false store signal histogram data"},
+   {"histograms",cf_opts,CF_BOOL,"Ignored, kept for backward compatibility"},
    {"tcpdump",cf_opts,CF_BOOL,"true/false use tcpdump if found"},
    {"tcpdumpcommand",cf_str,CF_PATHRANGE,"Path to the tcpdump command on this system"},
    {NULL,cf_notype,NULL,NULL}
@@ -241,6 +242,8 @@ struct BodySyntax CFK_CONTROLBODY[] =
    {"generate_manual",cf_opts,CF_BOOL,"true/false generate texinfo manual page skeleton for this version"},
    {"graph_directory",cf_str,CF_PATHRANGE,"Path to directory where rendered .png files will be created"},
    {"graph_output",cf_opts,CF_BOOL,"true/false generate png visualization of topic map if possible (requires lib)"},
+   {"goal_categories",cf_slist,"","A list of context names that represent parent categories for goals (goal patterns)"},
+   {"goal_patterns",cf_slist,"","A list of regular expressions that match promisees/topics considered to be organizational goals"},
    {"html_banner",cf_str,"","HTML code for a banner to be added to rendered in html after the header"},
    {"html_footer",cf_str,"","HTML code for a page footer to be added to rendered in html before the end body tag"},
    {"id_prefix",cf_str,".*","The LTM identifier prefix used to label topic maps (used for disambiguation in merging)"},
@@ -279,6 +282,7 @@ struct BodySyntax CFRE_CONTROLBODY[] = /* enum cfrecontrol */
 struct BodySyntax CFH_CONTROLBODY[] = /* enum cfh_control */
    {
    {"export_zenoss",cf_opts,CF_BOOL,"Make data available for Zenoss integration in docroot/reports/summary.z"},
+   {"federation",cf_slist,"","The list of cfengine servers supporting constellation integration with this hub"},
    {"hub_schedule",cf_slist,"","The class schedule used by cf-hub for report collation"},
    {"port",cf_int,"1024,99999","Default port for contacting hub nodes"},
    {NULL,cf_notype,NULL,NULL}

@@ -62,8 +62,8 @@ struct BodySyntax CF_OCCUR_BODIES[] =
    {
    {"represents",cf_slist,"","List of subtopics that explains the type(s) of information represented by the occurrence"},
    {"representation",cf_opts,"literal,url,db,file,web,image,portal","How to interpret the promiser string e.g. actual data or reference to data"},
-   {"web_root",cf_str,"","Base URL of the occurrence when rendered as a web-URL (replaces path_root)"},
-   {"path_root",cf_str,"","Base path of the occurrence when locating file (replaced by web_root)"},
+   {"web_root",cf_str,"","Base URL of the occurrence when rendered as a web-URL (deprecated)"},
+   {"path_root",cf_str,"","Base path of the occurrence when locating file (deprecated)"},
    {NULL,cf_notype,NULL,NULL}
    };
 
@@ -73,7 +73,25 @@ struct BodySyntax CF_TOPICS_BODIES[] =
    {
    {"association",cf_body,CF_RELATE_BODY,"Declare associated topics"},
    {"synonyms",cf_slist,"","A list of words to be treated as equivalents in the defined context"},
-   {"comment",cf_str,"","Retained comment about this promise's real intention"},
+   {"generalizations",cf_slist,"","A list of words to be treated as super-sets for the current topic, used when reasoning"},
+   {NULL,cf_notype,NULL,NULL}
+   };
+
+/***************************************************************/
+
+struct BodySyntax CF_THING_BODIES[] =
+   {
+   {"synonyms",cf_slist,"","A list of words to be treated as equivalents in the defined context"},
+   {"affects",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"belongs_to",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"certainty",cf_opts,"certain,uncertain,possible","Selects the level of certainty for the proposed knowledge, for use in inferential reasoning"},
+   {"determines",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"generalizations",cf_slist,"","A list of words to be treated as super-sets for the current topic, used when reasoning"},
+   {"is_connected_to",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"is_part_of",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"needs",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"provides",cf_slist,"","Special fixed relation for describing topics that are things"},
+   {"uses",cf_slist,"","Special fixed relation for describing topics that are things"},
    {NULL,cf_notype,NULL,NULL}
    };
 
@@ -81,8 +99,8 @@ struct BodySyntax CF_TOPICS_BODIES[] =
 
 struct BodySyntax CF_INFER_BODIES[] =
    {
-   {"precedent",cf_str,"","The foundational vector for a trinary inference"},
-   {"qualifier",cf_str,"","The second vector in a trinary inference"},
+   {"precedents",cf_slist,"","The foundational vector for a trinary inference"},
+   {"qualifiers",cf_slist,"","The second vector in a trinary inference"},
    {NULL,cf_notype,NULL,NULL}
    };
 
@@ -93,6 +111,7 @@ struct BodySyntax CF_INFER_BODIES[] =
 struct SubTypeSyntax CF_KNOWLEDGE_SUBTYPES[] =
   {
   {"knowledge","topics",CF_TOPICS_BODIES},
+  {"knowledge","things",CF_THING_BODIES},
   {"knowledge","occurrences",CF_OCCUR_BODIES},
   {"knowledge","inferences",CF_INFER_BODIES},
   {NULL,NULL,NULL},

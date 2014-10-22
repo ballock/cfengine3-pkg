@@ -12,6 +12,8 @@
 
 extern char *yytext;
 
+static void fatal_yyerror(const char *s);
+
 %}
 
 %token ID QSTRING CLASS CATEGORY BUNDLE BODY ASSIGN ARROW NAKEDVAR
@@ -164,7 +166,7 @@ selections:            selection                 /* BODY ONLY */
 selection:            id                         /* BODY ONLY */
                       ASSIGN 
                       rval
-                        { char *contextid = NULL;
+                        {
  
                         CheckSelection(P.blocktype,P.blockid,P.lval,P.rval,P.rtype);
 
@@ -192,7 +194,14 @@ selection:            id                         /* BODY ONLY */
                                  {
                                  if (VINPUTLIST == NULL)
                                     {
-                                    VINPUTLIST = P.rval;
+                                    if (P.rtype == CF_LIST)
+                                       {
+                                       VINPUTLIST = P.rval;
+                                       }
+                                    else
+                                       {
+                                       yyerror("inputs promise must have a list as rvalue");
+                                       }                                    
                                     }
                                  else
                                     {
@@ -229,7 +238,7 @@ category:             CATEGORY                  /* BUNDLE ONLY */
                                                  
                          if (strcmp(P.block,"bundle") == 0)
                             {
-                            struct SubTypeSyntax ss = CheckSubType(P.blocktype,P.currenttype);
+                            CheckSubType(P.blocktype,P.currenttype); /* FIXME: unused? */
                             P.currentstype = AppendSubType(P.currentbundle,P.currenttype);
                             }
                          };
@@ -312,14 +321,11 @@ constraints:           constraint               /* BUNDLE ONLY */
 constraint:           id                        /* BUNDLE ONLY */
                       ASSIGN 
                       rval
-                        { struct SubTypeSyntax ss;
-                          char *contextid = NULL;
-
+                        {
                         if (!INSTALL_SKIP)
-                           {
-                           ss = CheckSubType(P.blocktype,P.currenttype);                           
-                           CheckConstraint(P.currenttype,P.blockid,P.lval,P.rval,P.rtype,ss);                           
+                           {                           
                            AppendConstraint(&(P.currentpromise->conlist),P.lval,P.rval,P.rtype,"any",P.isbody);
+                           
                            P.rval = NULL;
                            strcpy(P.lval,"no lval");
                            P.currentRlist = NULL;
@@ -362,6 +368,14 @@ rval:                  ID
                          P.rtype = CF_SCALAR;
                          P.isbody = false;
                          Debug("Recorded scalarRVAL %s\n",P.rval);
+
+                         if (P.currentpromise)
+                            {
+                            if (LvalWantsBody(P.currentpromise->agentsubtype,P.lval))
+                               {
+                               yyerror("An rvalue is quoted, but we expect an unquoted body identifier");
+                               }
+                            }
                          }
                      | NAKEDVAR
                          {
@@ -459,9 +473,9 @@ usefunction:          functionid givearglist
 
 givearglist:            '('
                            {
-                           if (++P.arg_nesting > CF_MAX_NESTING)
+                           if (++P.arg_nesting >= CF_MAX_NESTING)
                               {
-                              yyerror("Nesting of functions is deeper than recommended");
+                              fatal_yyerror("Nesting of functions is deeper than recommended");
                               }
                            P.currentfnid[P.arg_nesting] = strdup(P.currentid);
                            Debug("Start FnCall %s args level %d\n",P.currentfnid[P.arg_nesting],P.arg_nesting);
@@ -521,22 +535,19 @@ gaitem:               ID
 
 /*****************************************************************/
 
-void yyerror(s)
-
-char *s;
-
+void yyerror(const char *s)
 { char *sp = yytext;
 
 if (sp == NULL)
    {
-   fprintf (stderr, "%s:%s:%d,%d: %s, near token \'NULL\'\n",VPREFIX,P.filename,P.line_no,P.line_pos,s);
+   fprintf (stderr, "%s> %s:%d,%d: %s, near token \'NULL\'\n",VPREFIX,P.filename,P.line_no,P.line_pos,s);
    }
 else if (*sp == '\"' && strlen(sp) > 1)
    {
    sp++;
    }
 
-fprintf (stderr, "%s:%s:%d,%d: %s, near token \'%.20s\'\n",VPREFIX,P.filename,P.line_no,P.line_pos,s,sp);
+fprintf (stderr, "%s> %s:%d,%d: %s, near token \'%.20s\'\n",VPREFIX,P.filename,P.line_no,P.line_pos,s,sp);
 
 ERRORCOUNT++;
 
@@ -544,6 +555,18 @@ if (ERRORCOUNT > 10)
    {
    FatalError("Too many errors");
    }
+}
+
+static void fatal_yyerror(const char *s)
+{
+char *sp = yytext;
+/* Skip quotation mark */
+if (sp && *sp == '\"' && sp[1])
+   {
+   sp++;
+   }
+
+FatalError("%s> %s: %d,%d: Fatal error during parsing: %s, near token \'%.20s\'\n", VPREFIX, P.filename, P.line_no, P.line_pos, s, sp ? sp : "NULL");
 }
 
 /*****************************************************************/

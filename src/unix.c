@@ -224,7 +224,9 @@ else if (pid == 0)                     /* child */
    }
 else                                    /* parent */
    {
+#ifndef HAVE_WAITPID
    pid_t wait_result;
+#endif
    ALARM_PID = pid;
 
 #ifdef HAVE_WAITPID
@@ -329,12 +331,13 @@ return killed;
 
 /* from verify_processes.c */
 
-int Unix_LoadProcessTable(struct Item **procdata,char *psopts)
+int Unix_LoadProcessTable(struct Item **procdata)
 
 { FILE *prp;
   char pscomm[CF_MAXLINKSIZE], vbuff[CF_BUFSIZE], *sp;
   struct Item *rootprocs = NULL;
   struct Item *otherprocs = NULL;
+  const char *psopts = GetProcessOptions();
 
 snprintf(pscomm,CF_MAXLINKSIZE,"%s %s",VPSCOMM[VSYSTEMHARDCLASS],psopts);
 

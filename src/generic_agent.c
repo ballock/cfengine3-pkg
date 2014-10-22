@@ -39,13 +39,26 @@ extern void CheckOpts(int argc,char **argv);
 
 /*****************************************************************************/
 
+static void SanitizeEnvironment()
+{
+ /* ps(1) and other utilities invoked by Cfengine may be affected */
+unsetenv("COLUMNS");
+ 
+ /* Make sure subprocesses output is not localized */
+unsetenv("LANG");
+unsetenv("LANGUAGE");
+unsetenv("LC_MESSAGES");
+}
+
+/*****************************************************************************/
+
 void GenericInitialize(int argc,char **argv,char *agents)
 
 { enum cfagenttype ag = Agent2Type(agents);
   char vbuff[CF_BUFSIZE];
   int ok = false;
 
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
 CF_DEFAULT_DIGEST = cf_sha256;
 CF_DEFAULT_DIGEST_LEN = CF_SHA256_LEN;
 #else
@@ -58,6 +71,7 @@ InitializeGA(argc,argv);
 SetReferenceTime(true);
 SetStartTime(false);
 SetSignals();
+SanitizeEnvironment();
 
 strcpy(THIS_AGENT,CF_AGENTTYPES[ag]);
 NewClass(THIS_AGENT);
@@ -115,19 +129,40 @@ SetPolicyServer(POLICY_SERVER);
 
 if (ag != cf_keygen)
    {
-   if (MissingInputFile())
+   if (!MissingInputFile())
       {
-      ok = false;
-      }
-   else if (SHOWREPORTS || NewPromiseProposals())
-      {
-      CfOut(cf_verbose,""," -> New promises proposals detected...\n");
-      ok = BOOTSTRAP || CheckPromises(ag);
-      }
-   else
-      {
-      CfOut(cf_verbose,""," -> No new promises proposals - so policy is already validated\n");
-      ok = true;
+      bool check_promises = false;
+
+      if (SHOWREPORTS)
+         {
+         check_promises = true;
+         CfOut(cf_verbose, "", " -> Reports mode is enabled, force-validating policy");
+         }
+      if (IsFileOutsideDefaultRepository(VINPUTFILE))
+         {
+         check_promises = true;
+         CfOut(cf_verbose, "", " -> Input file is outside default repository, validating it");
+         }
+      if (NewPromiseProposals())
+         {
+         check_promises = true;
+         CfOut(cf_verbose, "", " -> Input file is changed since last valiadtion, validating it");
+         }
+
+      if (check_promises)
+         {
+         ok = CheckPromises(ag);
+         if (BOOTSTRAP && !ok)
+            {
+            CfOut(cf_verbose, "", " -> Policy is not valid, but proceeding with bootstrap");
+            ok = true;
+            }
+         }
+      else
+         {
+         CfOut(cf_verbose, "", " -> Policy is already validated");
+         ok = true;
+         }
       }
    
    if (ok)
@@ -171,7 +206,7 @@ CloseAllDB();
 
 int CheckPromises(enum cfagenttype ag)
 
-{ char cmd[CF_BUFSIZE],path[CF_BUFSIZE];
+{ char cmd[CF_BUFSIZE];
   char filename[CF_MAXVARSIZE];
   struct stat sb;
   int fd;
@@ -193,7 +228,7 @@ if (cfstat(cmd,&sb) == -1)
 
 /* If we are cf-agent, check syntax before attempting to run */
 
-if ((*VINPUTFILE == '.') || IsAbsoluteFileName(VINPUTFILE))
+if (IsFileOutsideDefaultRepository(VINPUTFILE))
    {
    snprintf(cmd,CF_BUFSIZE-1,"\"%s%cbin%ccf-promises%s\" -f \"%s\"",CFWORKDIR,FILE_SEPARATOR,FILE_SEPARATOR,EXEC_SUFFIX,VINPUTFILE);
    }
@@ -244,7 +279,6 @@ void ReadPromises(enum cfagenttype ag,char *agents)
 { char *v,rettype;
   void *retval;
   char vbuff[CF_BUFSIZE];
-  struct Constraint *cp;
 
 if (ag == cf_keygen)
    {
@@ -275,11 +309,6 @@ if (GetVariable("control_common","version",&retval,&rettype) != cf_notype)
 else
    {
    v = "not specified";
-   }
-
-if (strchr(retval,':'))
-   {
-   CfOut(cf_error,""," !! The version string may not contain the \":\" character");
    }
 
 snprintf(vbuff,CF_BUFSIZE-1,"Expanded promises for %s",agents);
@@ -358,10 +387,11 @@ switch (ag)
 
 void InitializeGA(int argc,char *argv[])
 
-{ char *sp;
-  int i,j,seed,force = false;
+{
+  int seed,force = false;
   struct stat statbuf,sb;
-  unsigned char s[16],vbuff[CF_BUFSIZE];
+  unsigned char s[16];
+  char vbuff[CF_BUFSIZE];
   char ebuff[CF_EXPANDSIZE];
 
 SHORT_CFENGINEPORT =  htons((unsigned short)5308);
@@ -385,7 +415,7 @@ strcpy(FILE_SEPARATOR_STR,"/");
 
 NewClass("any");
 
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
 NewClass("nova_edition");
 #else
 NewClass("community_edition");
@@ -839,7 +869,7 @@ void CloseReports(char *agents)
 
 { char name[CF_BUFSIZE];
 
-#ifndef HAVE_LIBCFNOVA 
+#ifndef HAVE_NOVA 
 if (SHOWREPORTS)
    {
    CfOut(cf_verbose,"","Wrote compilation report %s%creports%cpromise_output_%s.txt",CFWORKDIR,FILE_SEPARATOR,FILE_SEPARATOR,agents);
@@ -865,12 +895,9 @@ chmod(name,0644);
 
 void Cf3ParseFile(char *filename)
 
-{ FILE *save_yyin = yyin;
+{
   struct stat statbuf;
-  struct Rlist *rp;
-  int access = false;
   char wfilename[CF_BUFSIZE];
-
 
 strncpy(wfilename,InputLocation(filename),CF_BUFSIZE);
 
@@ -940,7 +967,6 @@ fclose (yyin);
 struct Constraint *ControlBodyConstraints(enum cfagenttype agent)
 
 { struct Body *body;
-  char scope[CF_BUFSIZE];
 
 for (body = BODIES; body != NULL; body = body->next)
    {
@@ -1070,7 +1096,7 @@ CfOut(cf_verbose,"","***********************************************************
 
 if (VERBOSE || DEBUG)
    {
-   printf("%s BUNDLE %s",VPREFIX,bp->name);
+   printf("%s> BUNDLE %s",VPREFIX,bp->name);
    }
 
 if (params && (VERBOSE||DEBUG))
@@ -1099,7 +1125,7 @@ CfOut(cf_verbose,"","      * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 if (VERBOSE || DEBUG)
    {
-   printf("%s       BUNDLE %s",VPREFIX,bp->name);
+   printf("%s>       BUNDLE %s",VPREFIX,bp->name);
    }
 
 if (params && (VERBOSE||DEBUG))
@@ -1137,8 +1163,8 @@ CfOut(cf_verbose,"","    .......................................................
 
 if (VERBOSE||DEBUG)
    {
-   printf ("%s     Promise handle: %s\n",VPREFIX,handle);
-   printf ("%s     Promise made by: %s",VPREFIX,pp->promiser);
+   printf ("%s>     Promise handle: %s\n",VPREFIX,handle);
+   printf ("%s>     Promise made by: %s",VPREFIX,pp->promiser);
    }
 
 if (pp->promisee)
@@ -1173,8 +1199,7 @@ void CheckWorkingDirectories()
 /* NOTE: We do not care about permissions (ACLs) in windows */
 
 { struct stat statbuf;
-  int result;
-  char *sp,vbuff[CF_BUFSIZE];
+  char vbuff[CF_BUFSIZE];
   char output[CF_BUFSIZE];
 
 Debug("CheckWorkingDirectories()\n");
@@ -1217,7 +1242,7 @@ if (strlen(CFPRIVKEYFILE) == 0)
    }
 
 CfOut(cf_verbose,"","Checking integrity of the state database\n");
-snprintf(vbuff,CF_BUFSIZE,"%s%cstate",CFWORKDIR,FILE_SEPARATOR,FILE_SEPARATOR);
+snprintf(vbuff,CF_BUFSIZE,"%s%cstate",CFWORKDIR,FILE_SEPARATOR);
 
 if (cfstat(vbuff,&statbuf) == -1)
    {
@@ -1298,14 +1323,14 @@ char *InputLocation(char *filename)
 
 { static char wfilename[CF_BUFSIZE], path[CF_BUFSIZE];
 
-if (MINUSF && (filename != VINPUTFILE) && (*VINPUTFILE == '.' || IsAbsoluteFileName(VINPUTFILE)) && !IsAbsoluteFileName(filename))
+if (MINUSF && (filename != VINPUTFILE) && IsFileOutsideDefaultRepository(VINPUTFILE) && !IsAbsoluteFileName(filename))
    {
    /* If -f assume included relative files are in same directory */
    strncpy(path,VINPUTFILE,CF_BUFSIZE-1);
    ChopLastNode(path);
    snprintf(wfilename,CF_BUFSIZE-1,"%s%c%s",path,FILE_SEPARATOR,filename);
    }
-else if ((*filename == '.') || IsAbsoluteFileName(filename))
+else if (IsFileOutsideDefaultRepository(filename))
    {
    strncpy(wfilename,filename,CF_BUFSIZE-1);
    }
@@ -1321,43 +1346,16 @@ return MapName(wfilename);
 
 void CompilationReport(char *fname)
 
-{ char filename[CF_BUFSIZE],output[CF_BUFSIZE];
-
+{
 if (THIS_AGENT_TYPE != cf_common)
    {
    return;
    }
 
-#if defined(HAVE_LIBCFNOVA) && defined(HAVE_LIBMONGOC)
-if ((FREPORT_TXT = fopen(NULLFILE,"w")) == NULL)
-   {
-   snprintf(output,CF_BUFSIZE,"Could not write output log to %s",filename);
-   FatalError(output);
-   }
-
-if ((FREPORT_HTML = fopen(NULLFILE,"w")) == NULL)
-   {
-   snprintf(output,CF_BUFSIZE,"Could not write output log to %s",filename);
-   FatalError(output);
-   }
+#if defined(HAVE_NOVA)
+Nova_OpenCompilationReportFiles(fname);
 #else
-snprintf(filename,CF_BUFSIZE-1,"%s.txt",fname);
-CfOut(cf_inform,"","Summarizing promises as text to %s\n",filename);
-
-if ((FREPORT_TXT = fopen(filename,"w")) == NULL)
-   {
-   snprintf(output,CF_BUFSIZE,"Could not write output log to %s",filename);
-   FatalError(output);
-   }
-
-snprintf(filename,CF_BUFSIZE-1,"%s.html",fname);
-CfOut(cf_inform,"","Summarizing promises as html to %s\n",filename);
-
-if ((FREPORT_HTML = fopen(filename,"w")) == NULL)
-   {
-   snprintf(output,CF_BUFSIZE,"Could not write output log to %s",filename);
-   FatalError(output);
-   }
+OpenCompilationReportFiles(fname);
 #endif
 
 if ((FKNOW = fopen(NULLFILE,"w")) == NULL)
@@ -1372,19 +1370,39 @@ fclose(FREPORT_TXT);
 fclose(FKNOW);
 }
 
+void OpenCompilationReportFiles(const char *fname)
+{
+char filename[CF_BUFSIZE];
+
+snprintf(filename,CF_BUFSIZE-1,"%s.txt",fname);
+CfOut(cf_inform,"","Summarizing promises as text to %s\n",filename);
+
+if ((FREPORT_TXT = fopen(filename,"w")) == NULL)
+   {
+   FatalError("Could not write output log to %s",filename);
+   }
+
+snprintf(filename,CF_BUFSIZE-1,"%s.html",fname);
+CfOut(cf_inform,"","Summarizing promises as html to %s\n",filename);
+
+if ((FREPORT_HTML = fopen(filename,"w")) == NULL)
+   {
+   FatalError("Could not write output log to %s",filename);
+   }
+}
+
+
 /*******************************************************************/
 
 void VerifyPromises(enum cfagenttype agent)
 
-{ struct Bundle *bp,*bundles;
+{ struct Bundle *bp;
   struct SubType *sp;
   struct Promise *pp;
   struct Body *bdp;
-  struct Scope *ptr;
-  struct Rlist *rp,*params;
+  struct Rlist *rp;
   struct FnCall *fp;
-  char buf[CF_BUFSIZE], *scope;
-  char rettype,*name;
+  char *scope;
 
 Debug("\n\nVerifyPromises()\n");
 
@@ -1549,13 +1567,9 @@ for (pp = classlist; pp != NULL; pp=pp->next)
 void CheckControlPromises(char *scope,char *agent,struct Constraint *controllist)
 
 { struct Constraint *cp;
-  struct SubTypeSyntax *sp;
   struct BodySyntax *bp = NULL;
-  char *lval;
-  void *rval = NULL,*retval;
-  int i = 0,override = true;
+  int i = 0;
   struct Rval returnval;
-  char rettype,rtype;
 
 Debug("CheckControlPromises(%s)\n",agent);
 
@@ -1738,18 +1752,7 @@ printf(".pp\nThis software is Copyright (C) 2008- Cfengine AS.\n");
 void Version(char *component)
 
 {
-char vStr[CF_SMALLBUF];
-
-if (INFORM || VERBOSE)
-  {
-  snprintf(vStr,sizeof(vStr),"%s (%s)",VERSION,CF3_REVISION);
-  }
-else
-  {
-  snprintf(vStr,sizeof(vStr),"%s",VERSION);
-  }
-
-printf("This comprises %s core community version %s - Copyright %s%s\n",component,vStr,CF3COPYRIGHT,VYEAR);
+printf("This comprises %s core community version %s - Copyright %s%s\n",component,VERSION,CF3COPYRIGHT,VYEAR);
 EnterpriseVersion();
 }
 
@@ -1776,9 +1779,8 @@ fclose(fp);
 
 void HashVariables(char *name)
 
-{ struct Bundle *bp,*bundles;
+{ struct Bundle *bp;
   struct SubType *sp;
-  struct Scope *ptr;
 
 CfOut(cf_verbose,"","Initiate variable convergence...\n");
     
@@ -1840,7 +1842,7 @@ for (bdp = BODIES; bdp != NULL; bdp = bdp->next) /* get schedule */
 
 void UnHashVariables()
 
-{ struct Bundle *bp,*bundles;
+{ struct Bundle *bp;
 
 for (bp = BUNDLES; bp != NULL; bp = bp->next) /* get schedule */
    {

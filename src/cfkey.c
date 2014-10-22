@@ -93,10 +93,8 @@ return 0;
 void CheckOpts(int argc,char **argv)
 
 { extern char *optarg;
-  struct Item *actionList;
   int optindex = 0;
   int c;
-  char ld_library_path[CF_BUFSIZE];
 
 while ((c=getopt_long(argc,argv,"d:vf:VMs",OPTIONS,&optindex)) != EOF)
   {
@@ -155,7 +153,7 @@ void ShowLastSeenHosts()
   void *value;
   char name[CF_BUFSIZE],hostname[CF_BUFSIZE],address[CF_MAXVARSIZE];
   struct CfKeyHostSeen entry;
-  int ret,ksize,vsize;
+  int ksize,vsize;
   int count = 0;
 
 snprintf(name,CF_BUFSIZE-1,"%s/%s",CFWORKDIR,CF_LASTDB_FILE);
@@ -179,7 +177,7 @@ if (!NewDBCursor(dbp,&dbcp))
 
 memset(&entry, 0, sizeof(entry));
 
-printf("%15.15s %-25.25s %15.15s \n","IP","Name","Key");
+printf("%9.9s %15.15s %-25.25s %15.15s\n","Direction","IP","Name","Key");
  /* Walk through the database and print out the key/data pairs. */
 while(NextDB(dbp,dbcp,&key,&ksize,&value,&vsize))
    {
@@ -196,10 +194,12 @@ while(NextDB(dbp,dbcp,&key,&ksize,&value,&vsize))
       }
    CfOut(cf_verbose,""," -> Reporting on %s",hostname);
       
-   printf("%15.15s %-25.25s %s \n",
+   printf("%-9.9s %15.15s %-25.25s %s\n",
+             hostname[0] == '+' ? "Incoming" : "Outgoing",
      	     address,	     
 	     IPString2Hostname(address),
-             hostname+1);
+             hostname+1
+          );
    }
 printf("Total Entries: %d\n",count);
 DeleteDBCursor(dbp,dbcp);

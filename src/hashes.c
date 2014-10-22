@@ -296,10 +296,6 @@ while (ptr->hashtable[slot])
             CfOut(cf_inform,""," !! in bundle parameterization\n",fname,lineno);
             }
          }
-      else
-         {
-         CfOut(cf_inform,""," !! Unresolved variables in rval of \"%s\" in scope %s",lval,ptr->scope);
-         }
 
       DeleteAssoc(ptr->hashtable[slot]);
       ptr->hashtable[slot] = ap;
@@ -308,8 +304,6 @@ while (ptr->hashtable[slot])
       }
    else
       {
-      struct CfAssoc *ap2 = ptr->hashtable[slot];
-
       if (++slot >= CF_HASHTABLESIZE-1)
          {
          slot = 0;
@@ -368,7 +362,7 @@ for (i = 0; i < CF_HASHTABLESIZE; i++)
 
            state = (struct Rlist *)(cplist->rval);
 
-           if (rp->state_ptr == NULL || rp->state_ptr && rp->state_ptr->type == CF_FNCALL)
+           if (rp->state_ptr == NULL || rp->state_ptr->type == CF_FNCALL)
               {
               /* Unexpanded function, or blank variable must be skipped.*/
               return;

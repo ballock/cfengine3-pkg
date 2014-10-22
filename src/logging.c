@@ -37,7 +37,7 @@
 void BeginAudit()
 
 { struct Promise dummyp = {0};
-  struct Attributes dummyattr = {0};
+  struct Attributes dummyattr = {{0}};
 
 if (THIS_AGENT_TYPE != cf_agent)
    {
@@ -58,7 +58,7 @@ void EndAudit()
   char *sp,rettype,string[CF_BUFSIZE];
   void *retval;
   struct Promise dummyp = {0};
-  struct Attributes dummyattr = {0};
+  struct Attributes dummyattr = {{0}};
 
 if (THIS_AGENT_TYPE != cf_agent)
    {
@@ -135,32 +135,30 @@ ClassAuditLog(&dummyp,dummyattr,"Cfagent closing",CF_NOP,"");
 void ClassAuditLog(struct Promise *pp,struct Attributes attr,char *str,char status,char *reason)
 
 { time_t now = time(NULL);
-  char date[CF_BUFSIZE],lock[CF_BUFSIZE],key[CF_BUFSIZE],operator[CF_BUFSIZE],id[CF_MAXVARSIZE];
+  char date[CF_BUFSIZE],lock[CF_BUFSIZE],key[CF_BUFSIZE],operator[CF_BUFSIZE];
   struct AuditLog newaudit;
   struct Audit *ap = pp->audit;
   struct timespec t;
   double keyval;
   int lineno = pp->lineno;
   char name[CF_BUFSIZE];
-  char *exceptions[] = { "vars", "classes", "insert_lines", "delete_lines", "replace_patterns", "field_edits", NULL };
-  int i;
+  char *noStatusTypes[] = { "vars", "classes", NULL };
+  char *noLogTypes[] = { "insert_lines", "delete_lines", "replace_patterns", "field_edits", NULL };
+  bool log = true;
 
-  // Don't log these items
+  Debug("ClassAuditLog(%s)\n",str);
 
-if (pp->agentsubtype == NULL)
+  // never count vars or classes as repaired (creates messy reports)
+
+if (pp && (pp->agentsubtype == NULL || IsStrIn(pp->agentsubtype,noStatusTypes,false)))
    {
    return;
    }
-  
-for (i = 0; exceptions[i] != NULL; i++)
-   {
-   if (strcmp(pp->agentsubtype,exceptions[i]) == 0)
-      {
-      return;
-      }
-   }
 
-Debug("ClassAuditLog(%s)\n",str);
+if (pp && IsStrIn(pp->agentsubtype,noLogTypes,false))
+   {
+   log = false;
+   }
 
 switch(status)
    {
@@ -174,15 +172,23 @@ switch(status)
 
        AddAllClasses(attr.classes.change,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_change);
-       NotePromiseCompliance(pp,0.5,cfn_repaired,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_repaired);
+       
+       if (log)
+          {
+          NotePromiseCompliance(pp,0.5,cfn_repaired,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_repaired);
+          }
        break;
        
    case CF_WARN:
 
        PR_NOTKEPT++;
        VAL_NOTKEPT += attr.transaction.value_notkept;
-       NotePromiseCompliance(pp,1.0,cfn_notkept,reason);
+       
+       if(log)
+          {
+          NotePromiseCompliance(pp,1.0,cfn_notkept,reason);
+          }
        break;
        
    case CF_TIMEX:
@@ -191,8 +197,13 @@ switch(status)
        VAL_NOTKEPT += attr.transaction.value_notkept;
        AddAllClasses(attr.classes.timeout,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_notkept);
-       NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+
+       
+       if(log)
+          {
+          NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+          }
        break;
 
    case CF_FAIL:
@@ -201,8 +212,12 @@ switch(status)
        VAL_NOTKEPT += attr.transaction.value_notkept;
        AddAllClasses(attr.classes.failure,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_notkept);
-       NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+
+       if(log)
+          {
+          NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+          }
        break;
        
    case CF_DENIED:
@@ -211,8 +226,12 @@ switch(status)
        VAL_NOTKEPT += attr.transaction.value_notkept;
        AddAllClasses(attr.classes.denied,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_notkept);
-       NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+
+       if(log)
+          {
+          NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+          }
        break;
        
    case CF_INTERPT:
@@ -221,8 +240,12 @@ switch(status)
        VAL_NOTKEPT += attr.transaction.value_notkept;
        AddAllClasses(attr.classes.interrupt,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_notkept);
-       NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+
+       if(log)
+          {       
+          NotePromiseCompliance(pp,0.0,cfn_notkept,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_failed);
+          }
        break;
 
    case CF_UNKNOWN:
@@ -230,8 +253,13 @@ switch(status)
 
        AddAllClasses(attr.classes.kept,attr.classes.persist,attr.classes.timer);
        DeleteAllClasses(attr.classes.del_kept);
-       NotePromiseCompliance(pp,1.0,cfn_nop,reason);
-       SummarizeTransaction(attr,pp,attr.transaction.log_kept);              
+
+       if(log)
+          {
+          NotePromiseCompliance(pp,1.0,cfn_nop,reason);
+          SummarizeTransaction(attr,pp,attr.transaction.log_kept);
+          }
+       
        PR_KEPT++;
        VAL_KEPT += attr.transaction.value_kept;
        break;
@@ -308,7 +336,7 @@ else
 
 newaudit.status = status;
 
-if (AUDITDBP && attr.transaction.audit || AUDITDBP && AUDIT)
+if (AUDITDBP && (attr.transaction.audit || AUDIT))
    {
    WriteDB(AUDITDBP,key,&newaudit,sizeof(newaudit));
    }
@@ -453,7 +481,7 @@ op[i] = '\0';
 
 void PromiseLog(char *s)
 
-{ char filename[CF_BUFSIZE],start[CF_BUFSIZE],end[CF_BUFSIZE];
+{ char filename[CF_BUFSIZE];
   time_t now = time(NULL);
   FILE *fout;
 
@@ -477,13 +505,18 @@ fclose(fout);
 
 /************************************************************************/
 
-void FatalError(char *s)
+void FatalError(char *s, ...)
     
 { struct CfLock best_guess;
 
 if (s)
    {
-   CfOut(cf_error,"","Fatal cfengine error: %s",s); 
+   va_list ap;
+   char buf[CF_BUFSIZE] = "";
+   va_start(ap, s);
+   vsnprintf(buf, CF_BUFSIZE - 1, s, ap);
+   va_end(ap);
+   CfOut(cf_error,"","Fatal cfengine error: %s", buf);
    }
 
 if (strlen(CFLOCK) > 0)

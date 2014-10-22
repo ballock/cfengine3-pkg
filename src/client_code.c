@@ -35,6 +35,14 @@
 #include "cf3.defs.h"
 #include "cf3.extern.h"
 
+static void CacheServerConnection(struct cfagent_connection *conn,char *server);
+static int TryConnect(struct cfagent_connection *conn, struct timeval *tvp, struct sockaddr *cinp, int cinpSz);
+static void MarkServerOffline(char *server);
+static struct cfagent_connection *ServerConnectionReady(char *server);
+static int ServerOffline(char *server);
+static void FlushFileStream(int sd,int toget);
+static int CacheStat(char *file,struct stat *statbuf,char *stattype,struct Attributes attr,struct Promise *pp);
+
 /*********************************************************************/
 
 void DetermineCfenginePort()
@@ -87,7 +95,7 @@ for (rp = attr.copy.servers; rp != NULL; rp = rp->next)
       }
    else
       {   
-      if (conn = ServerConnectionReady(rp->item))
+      if ((conn = ServerConnectionReady(rp->item)))
          {
          return conn;
          }
@@ -118,7 +126,6 @@ return NULL;
 struct cfagent_connection *ServerConnection(char *server,struct Attributes attr,struct Promise *pp)
 
 { struct cfagent_connection *conn;
-  char username[CF_SMALLBUF];
  
 #ifndef MINGW
 static sigset_t   signal_mask;
@@ -644,10 +651,10 @@ else
 
 int CopyRegularFileNet(char *source,char *new,off_t size,struct Attributes attr,struct Promise *pp)
 
-{ int dd, buf_size,n_read = 0,toget,towrite,plainlen,more = true, finlen;
-  int last_write_made_hole = 0, done = false,tosend,cipherlen=0,value;
-  char *buf,in[CF_BUFSIZE],out[CF_BUFSIZE],workbuf[CF_BUFSIZE],cfchangedstr[265];
-  unsigned char iv[32] = {1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8};
+{ int dd, buf_size,n_read = 0,toget,towrite;
+  int last_write_made_hole = 0, done = false,tosend,value;
+  char *buf,workbuf[CF_BUFSIZE],cfchangedstr[265];
+
   long n_read_total = 0;  
   EVP_CIPHER_CTX ctx;
   struct cfagent_connection *conn = pp->conn;
@@ -798,8 +805,8 @@ return true;
 
 int EncryptCopyRegularFileNet(char *source,char *new,off_t size,struct Attributes attr,struct Promise *pp)
 
-{ int dd, blocksize = 2048,n_read = 0,toget,towrite,plainlen,more = true, finlen,cnt = 0;
-  int last_write_made_hole = 0, done = false,tosend,cipherlen=0,value;
+{ int dd, blocksize = 2048,n_read = 0,towrite,plainlen,more = true, finlen,cnt = 0;
+  int last_write_made_hole = 0, tosend,cipherlen=0;
   char *buf,in[CF_BUFSIZE],out[CF_BUFSIZE],workbuf[CF_BUFSIZE],cfchangedstr[265];
   unsigned char iv[32] = {1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8};
   long n_read_total = 0;  
@@ -880,7 +887,7 @@ while (more)
       return false;      
       }
 
-   EVP_DecryptInit(&ctx,CfengineCipher(CfEnterpriseOptions()),conn->session_key,iv);
+   EVP_DecryptInit_ex(&ctx,CfengineCipher(CfEnterpriseOptions()),NULL,conn->session_key,iv);
 
    if (!EVP_DecryptUpdate(&ctx,workbuf,&plainlen,buf,cipherlen))
       {
@@ -890,7 +897,7 @@ while (more)
       return false;
       }
 
-   if (!EVP_DecryptFinal(&ctx,workbuf+plainlen,&finlen))
+   if (!EVP_DecryptFinal_ex(&ctx,workbuf+plainlen,&finlen))
       {
       Debug("Final decrypt failed\n");
       close(dd);
@@ -943,7 +950,7 @@ return true;
 
 int ServerConnect(struct cfagent_connection *conn,char *host,struct Attributes attr, struct Promise *pp) 
 
-{ int err;
+{
   short shortport;
   char strport[CF_MAXVARSIZE] = {0};
   struct sockaddr_in cin = {0};
@@ -995,8 +1002,6 @@ if (!attr.copy.force_ipv4)
    
    for (ap = response; ap != NULL; ap = ap->ai_next)
       {
-      int  res;
-      
       CfOut(cf_verbose,""," -> Connect to %s = %s on port %s\n",host,sockaddr_ntop(ap->ai_addr),strport);
       
       if ((conn->sd = socket(ap->ai_family,ap->ai_socktype,ap->ai_protocol)) == -1)
@@ -1073,7 +1078,6 @@ if (!attr.copy.force_ipv4)
 #endif /* ---------------------- only have ipv4 ---------------------------------*/ 
 
    {
-   int  res;
    struct hostent *hp;
    memset(&cin,0,sizeof(cin));
    
@@ -1111,10 +1115,9 @@ if (!attr.copy.force_ipv4)
 
 /*********************************************************************/
 
-int ServerOffline(char *server)
+static int ServerOffline(char *server)
     
 { struct Rlist *rp;
-  struct cfagent_connection *conn;
   struct ServerItem *svp;
   char ipname[CF_MAXVARSIZE];
 
@@ -1142,10 +1145,9 @@ return false;
 
 /*********************************************************************/
 
-struct cfagent_connection *ServerConnectionReady(char *server)
+static struct cfagent_connection *ServerConnectionReady(char *server)
 
 { struct Rlist *rp;
-  struct cfagent_connection *conn;
   struct ServerItem *svp;
   char ipname[CF_MAXVARSIZE];
 
@@ -1203,7 +1205,7 @@ CfOut(cf_verbose,"","Existing connection just became free...\n");
 
 /*********************************************************************/
 
-void MarkServerOffline(char *server)
+static void MarkServerOffline(char *server)
 
 /* Unable to contact the server so don't waste time trying for
    other connections, mark it offline */
@@ -1256,7 +1258,7 @@ if ((svp->server = strdup(ipname)) == NULL)
 free(rp->item);
 rp->item = svp;
 
-if (svp->conn = NewAgentConn())
+if ((svp->conn = NewAgentConn()))
    {
    /* If we couldn't connect, mark this server unavailable for everyone */
    svp->conn->sd = CF_COULD_NOT_CONNECT;
@@ -1269,7 +1271,7 @@ ThreadUnlock(cft_getaddr);
 
 /*********************************************************************/
 
-void CacheServerConnection(struct cfagent_connection *conn,char *server)
+static void CacheServerConnection(struct cfagent_connection *conn,char *server)
 
 /* First time we open a connection, so store it */
     
@@ -1297,7 +1299,7 @@ ThreadUnlock(cft_getaddr);
 
 /*********************************************************************/
 
-int CacheStat(char *file,struct stat *statbuf,char *stattype,struct Attributes attr,struct Promise *pp)
+static int CacheStat(char *file,struct stat *statbuf,char *stattype,struct Attributes attr,struct Promise *pp)
 
 { struct cfstat *sp;
 
@@ -1344,7 +1346,7 @@ return false;
 
 /*********************************************************************/
 
-void FlushFileStream(int sd,int toget)
+static void FlushFileStream(int sd,int toget)
 
 { int i;
   char buffer[2]; 
@@ -1360,7 +1362,7 @@ for (i = 0; i < toget; i++)
 
 /*********************************************************************/
 
-int TryConnect(struct cfagent_connection *conn, struct timeval *tvp, struct sockaddr *cinp, int cinpSz)
+static int TryConnect(struct cfagent_connection *conn, struct timeval *tvp, struct sockaddr *cinp, int cinpSz)
 
 /** 
  * Tries a nonblocking connect and then restores blocking if
@@ -1378,7 +1380,9 @@ return NovaWin_TryConnect(conn,tvp,cinp,cinpSz);
 { int res;
   long arg;
   struct sockaddr_in emptyCin = {0};
+#ifdef LINUX
   struct timeval tvRecv = {0};
+#endif
 
   if (!cinp)
      {

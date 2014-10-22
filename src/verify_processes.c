@@ -36,7 +36,7 @@
 
 void VerifyProcessesPromise(struct Promise *pp)
 
-{ struct Attributes a = {0};
+{ struct Attributes a = {{0}};
 
 a = GetProcessAttributes(pp);
 ProcessSanityChecks(a,pp);
@@ -128,7 +128,7 @@ YieldCurrentLock(thislock);
 
 /*******************************************************************/
 
-int LoadProcessTable(struct Item **procdata,char *psopts)
+int LoadProcessTable(struct Item **procdata)
 {
 if (PROCESSTABLE)
    {
@@ -139,7 +139,7 @@ if (PROCESSTABLE)
 #ifdef MINGW
 return NovaWin_LoadProcessTable(procdata);
 #else
-return Unix_LoadProcessTable(procdata,psopts);
+return Unix_LoadProcessTable(procdata);
 #endif
 }
 
@@ -147,10 +147,8 @@ return Unix_LoadProcessTable(procdata,psopts);
 
 void VerifyProcessOp(struct Item *procdata,struct Attributes a,struct Promise *pp)
 
-{ char line[CF_BUFSIZE];
+{
   int matches = 0,do_signals = true,out_of_range,killed = 0,need_to_restart = true;
-  mode_t maskval;
-  struct stat statbuf;
   struct Item *killlist = NULL;
 
 Debug("VerifyProcessOp\n");
@@ -200,15 +198,22 @@ if (do_signals && matches > 0)
    {
    if (a.process_stop != NULL)
       {
-      if (IsExecutable(GetArg0(a.process_stop)))
+      if (DONTDO)
          {
-         ShellCommandReturnsZero(a.process_stop,false);
+         cfPS(cf_error,CF_WARN,"",pp,a," -- Need to keep process-stop promise for %s, but only a warning is promised",pp->promiser);         
          }
       else
          {
-         cfPS(cf_verbose,CF_FAIL,"",pp,a,"Process promise to stop %s could not be kept because %s the stop operator failed",pp->promiser,a.process_stop);
-         DeleteItemList(killlist);
-         return;
+         if (IsExecutable(GetArg0(a.process_stop)))
+            {
+            ShellCommandReturnsZero(a.process_stop,false);
+            }
+         else
+            {
+            cfPS(cf_verbose,CF_FAIL,"",pp,a,"Process promise to stop %s could not be kept because %s the stop operator failed",pp->promiser,a.process_stop);
+            DeleteItemList(killlist);
+            return;
+            }
          }
       }
    else
@@ -246,14 +251,13 @@ else
 
 int FindPidMatches(struct Item *procdata,struct Item **killlist,struct Attributes a,struct Promise *pp)
 
-{ struct Item *ip, *ip2;
-  char *sp,saveuid[16];
-  int pid=-1,ret,matches=0,got,i,one_space,s,e,promised_zero;
+{ struct Item *ip;
+  char saveuid[16];
+  int pid=-1,matches=0,i,s,e,promised_zero;
   pid_t cfengine_pid = getpid();
   char *names[CF_PROCCOLS];      /* ps headers */
   int start[CF_PROCCOLS];
   int end[CF_PROCCOLS];
-  struct CfRegEx rex;
 
 if (procdata == NULL)
    {
@@ -273,13 +277,13 @@ for (ip = procdata->next; ip != NULL; ip=ip->next)
          continue;
          }
 
-      if(EMPTY(ip->name))
-	{
-	continue;
-	}
-
+      if (EMPTY(ip->name))
+         {
+         continue;
+         }
+      
       pid = ExtractPid(ip->name,names,start,end);
-
+      
       if (pid == -1)
          {
          CfOut(cf_verbose,"","Unable to extract pid while looking for %s\n",pp->promiser);

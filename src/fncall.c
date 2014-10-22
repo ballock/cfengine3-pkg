@@ -68,7 +68,6 @@ struct FnCall *NewFnCall(char *name, struct Rlist *args)
 
 { struct FnCall *fp;
   char *sp = NULL;
-  struct Rlist *rp;
 
 Debug("Installing Function Call %s\n",name);
 
@@ -138,8 +137,8 @@ return NewFnCall(f->name,ExpandList(contextid,f->args,false));
 
 void PrintFunctions()
 
-{ struct FnCall *fp;
-  int i;
+{
+int i;
 
 for (i = 0; i < 3; i++)
    {
@@ -236,8 +235,8 @@ else
 
 enum cfdatatype FunctionReturnType(char *name)
 
-{ struct FnCallType fncall;
-  int i;
+{
+int i;
 
 for (i = 0; CF_FNCALL_TYPES[i].name != NULL; i++)
    {
@@ -295,8 +294,6 @@ if ((pp != NULL) && !IsDefinedClass(pp->classes))
 ClearFnCallStatus();
 
 expargs = NewExpArgs(fp,pp);
-
-THIS_BUNDLE = pp->bundle;
 
 if (UnresolvedArgs(expargs))
    {
@@ -450,6 +447,9 @@ switch (this)
    case cfn_getindices:
        rval = FnCallGetIndices(fp,expargs);
        break;
+   case cfn_getvalues:
+       rval = FnCallGetValues(fp,expargs);
+       break;
    case cfn_countlinesmatching:
        rval = FnCallCountLinesMatching(fp,expargs);
        break;
@@ -497,6 +497,18 @@ switch (this)
        break;
    case cfn_readrealarray:
        rval = FnCallReadStringArray(fp,expargs,cf_real,false);
+       break;
+   case cfn_parsestringarray:
+       rval = FnCallParseStringArray(fp,expargs,cf_str,false);
+       break;
+   case cfn_parsestringarrayidx:
+       rval = FnCallParseStringArray(fp,expargs,cf_str,true);
+       break;
+   case cfn_parseintarray:
+       rval = FnCallParseStringArray(fp,expargs,cf_int,false);
+       break;
+   case cfn_parserealarray:
+       rval = FnCallParseStringArray(fp,expargs,cf_real,false);
        break;
    case cfn_irange:
        rval = FnCallIRange(fp,expargs);

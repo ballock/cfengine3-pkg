@@ -1,22 +1,25 @@
-/* 
-   Copyright (C) 2008 - Cfengine AS
+/*
+   Copyright (C) Cfengine AS
 
    This file is part of Cfengine 3 - written and maintained by Cfengine AS.
- 
+
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 3, or (at your option) any
-   later version. 
+   Free Software Foundation; version 3.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
+
   You should have received a copy of the GNU General Public License
-  
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 
+  To the extent this program is licensed as part of the Enterprise
+  versions of Cfengine, the applicable Commerical Open Source License
+  (COSL) may apply to this file if you as a licensee so wish it. See
+  included file COSL.txt.
 */
 
 /*****************************************************************************/
@@ -24,6 +27,9 @@
 /* File: cf3.defs.h                                                          */
 /*                                                                           */
 /*****************************************************************************/
+
+#ifndef CFENGINE_CF3_DEFS_H
+#define CFENGINE_CF3_DEFS_H
 
 /* These files are hard links to the cfengine 2 sources */
 
@@ -33,18 +39,7 @@
 #undef VERSION
 #undef Verbose
 
-#define CF3_REVISION "$Rev: 1718 $"
-
 #include "conf.h"
-
-#ifdef HAVE_PCRE_H
-#include <pcre.h>
-#endif
-
-#ifdef HAVE_PCRE_PCRE_H
-#include <pcre/pcre.h>
-#endif
-
 
 #ifndef NGROUPS
 # define NGROUPS 20
@@ -78,7 +73,7 @@
 #define CF_INBODY   1
 #define CF_INBUNDLE 2
 
-#define CF_MAX_NESTING 3
+#define CF_MAX_NESTING 10
 #define CF_MAX_REPLACE 20
 #define CF_DONEPASSES  4
 
@@ -369,6 +364,8 @@ enum cfkcontrol
    cfk_genman,
    cfk_graph_dir,
    cfk_graph_output,
+   cfk_goalcategories,
+   cfk_goalpatterns,
    cfk_htmlbanner,
    cfk_htmlfooter,
    cfk_tm_prefix,
@@ -412,6 +409,7 @@ enum cfrecontrol
 enum cfhcontrol
    {
    cfh_export_zenoss,
+   cfh_federation,
    cfh_schedule,
    cfh_port,
    cfh_notype
@@ -494,7 +492,101 @@ enum cfeditorder
 // Put this here now for caching efficiency
 
 #define NOVA_SOFTWARE_INSTALLED "software_packages.csv"
-#define NOVA_SYNONYM "has synonym"
+
+/***************************************************************************/
+/* Knowledge relationships                                                 */
+/***************************************************************************/
+
+#define KM_PARTOF_CERT_F "is/are a part of"
+#define KM_PARTOF_CERT_B "has/have as a part"
+#define KM_DETERMINES_CERT_F "determine(s)"
+#define KM_DETERMINES_CERT_B "is/are determined by"
+#define KM_CONTRIBUTES_CERT_F "contibutes to"
+#define KM_CONTRIBUTES_CERT_B "is contibuted to by"
+#define KM_USES_CERT_F "use(s)"
+#define KM_USES_CERT_B "is/are used by"
+#define KM_PROVIDES_CERT_F "provide(s)"
+#define KM_PROVIDES_CERT_B "is/are provided by"
+#define KM_BELONGS_CERT_F "belongs to"
+#define KM_BELONGS_CERT_B "owns"
+#define KM_AFFECTS_CERT_F "affects"
+#define KM_AFFECTS_CERT_B "is affected by"
+#define KM_CONNECTS_CERT_F "connects to"
+#define KM_CONNECTS_CERT_B "connects to"
+#define KM_NEEDS_CERT_F "needs"
+#define KM_NEEDS_CERT_B "is needed by"
+#define KM_EQUIV_CERT_F "is equivalent to"
+#define KM_EQUIV_CERT_B "is equivalent to"
+#define KM_SHIELD_CERT_F "denies access from"
+#define KM_SHIELD_CERT_B "is not allowed access to"
+#define KM_ACCESS_CERT_F "grants access to"
+#define KM_ACCESS_CERT_B "is allowed to access"
+#define KM_MONITOR_CERT_F "monitor(s)"
+#define KM_MONITOR_CERT_B "is/are monitored by"
+
+
+#define KM_PARTOF_POSS_F "can be a part of"
+#define KM_PARTOF_POSS_B "can have a part"
+#define KM_DETERMINES_POSS_F "can determine"
+#define KM_DETERMINES_POSS_B "can be determined by"
+#define KM_CONTRIBUTES_POSS_F "can contibute to"
+#define KM_CONTRIBUTES_POSS_B "can be contibuted to by"
+#define KM_USES_POSS_F "can use"
+#define KM_USES_POSS_B "can be used by"
+#define KM_PROVIDES_POSS_F "can provide"
+#define KM_PROVIDES_POSS_B "can be provided by"
+#define KM_BELONGS_POSS_F "can belong to"
+#define KM_BELONGS_POSS_B "can own"
+#define KM_AFFECTS_POSS_F "can affect"
+#define KM_AFFECTS_POSS_B "can be affected by"
+#define KM_CONNECTS_POSS_F "can connect to"
+#define KM_CONNECTS_POSS_B "can connect to"
+#define KM_NEEDS_POSS_F "can need"
+#define KM_NEEDS_POSS_B "can be needed by"
+#define KM_EQUIV_POSS_F "can be equivalent to"
+#define KM_EQUIV_POSS_B "can be equivalent to"
+#define KM_MONITOR_POSS_F "can monitor"
+#define KM_MONITOR_POSS_B "can be monitored by"
+#define KM_ACCESS_POSS_F "can access to"
+#define KM_ACCESS_POSS_B "can be allowed to access"
+
+#define KM_PARTOF_UNCERT_F "might be a part of"
+#define KM_PARTOF_UNCERT_B "might have a part"
+#define KM_DETERMINES_UNCERT_F "might determine"
+#define KM_DETERMINES_UNCERT_B "might be determined by"
+#define KM_CONTRIBUTES_UNCERT_F "might contibute to"
+#define KM_CONTRIBUTES_UNCERT_B "might be contibuted to by"
+#define KM_USES_UNCERT_F "might use"
+#define KM_USES_UNCERT_B "might be used by"
+#define KM_PROVIDES_UNCERT_F "might provide"
+#define KM_PROVIDES_UNCERT_B "might be provided by"
+#define KM_BELONGS_UNCERT_F "might belong to"
+#define KM_BELONGS_UNCERT_B "might own"
+#define KM_AFFECTS_UNCERT_F "might affect"
+#define KM_AFFECTS_UNCERT_B "might be affected by"
+#define KM_CONNECTS_UNCERT_F "might connect to"
+#define KM_CONNECTS_UNCERT_B "might connect to"
+#define KM_NEEDS_UNCERT_F "might need"
+#define KM_NEEDS_UNCERT_B "might be needed by"
+#define KM_EQUIV_UNCERT_F "might be equivalent to"
+#define KM_EQUIV_UNCERT_B "might be equivalent to"
+#define KM_SHIELD_UNCERT_F "might deny access from"
+#define KM_SHIELD_UNCERT_B "might not be allowed access to"
+#define KM_MONITOR_UNCERT_F "might monitor"
+#define KM_MONITOR_UNCERT_B "might be monitored by"
+#define KM_ACCESS_UNCERT_F "might grant access to"
+#define KM_ACCESS_UNCERT_B "might be allowed to access"
+
+#define KM_GENERALIZES_F "is a generalization of"
+#define KM_GENERALIZES_B "is a case of"
+#define KM_SYNONYM "is a synonym for"
+
+enum knowledgecertainty
+   {
+   cfk_certain,
+   cfk_uncertain,
+   cfk_possible
+   };
 
 /*************************************************************************/
 
@@ -564,6 +656,7 @@ enum fncalltype
    cfn_getindices,
    cfn_getuid,
    cfn_getusers,
+   cfn_getvalues,
    cfn_grep,
    cfn_groupexists,
    cfn_hash,
@@ -592,6 +685,10 @@ enum fncalltype
    cfn_ldapvalue,
    cfn_now,
    cfn_date,
+   cfn_parseintarray,
+   cfn_parserealarray,
+   cfn_parsestringarray,
+   cfn_parsestringarrayidx,
    cfn_peers,
    cfn_peerleader,
    cfn_peerleaders,
@@ -776,6 +873,19 @@ struct Scope                         /* $(bundlevar) $(scope.name) */
    struct CfAssoc *hashtable[CF_HASHTABLESIZE]; /* Variable heap  */
    struct Scope *next;
    };
+
+/*******************************************************************/
+
+struct Variable  /* Used to represent contents of var in DBM file -
+		    scope.name is key */
+   {
+   struct Event e;
+   enum cfdatatype dtype;
+   char rtype;
+   char rval[CF_MAXVARSIZE];    // as string, \0-terminated
+   };
+
+#define VARSTRUCTUSAGE(v) (sizeof(v) - sizeof(v.rval) + strlen(v.rval) + 1)
 
 /*******************************************************************/
 
@@ -1061,20 +1171,34 @@ enum promiselog_rep
    plog_notkept
    };
 
+enum time_window
+   {
+   time_hour,
+   time_day,
+   time_week
+   };
+
 /*************************************************************************/
 
-// Content-Driven Policy types
-typedef enum cdp_report
-{
-  cdp_acls,
-  cdp_commands,
-  cdp_filechanges,
-  cdp_filediffs,
-  cdp_registry,
-  cdp_services,
-  cdp_unknown
-}cdp_t;
+enum cfd_menu
+   {
+   cfd_menu_delta,
+   cfd_menu_full,
+   cfd_menu_relay,
+   cfd_menu_error
+   };
 
+/*************************************************************************/
+
+enum cfl_view
+   {
+   cfl_view_sumcomp_wk,
+   cfl_view_sumrepaired_wk,
+   cfl_view_sumnotkept_wk,
+   cfl_view_repairedreason,
+   cfl_view_notkeptreason,
+   cfl_view_error
+   };
 
 
 /*************************************************************************/
@@ -1082,19 +1206,6 @@ typedef enum cdp_report
 /*************************************************************************/
 
 #define OVECCOUNT 30
-
-struct CfRegEx
-{
-#if defined HAVE_PCRE_H || defined HAVE_PCRE_PCRE_H
-   pcre *rx;
-   const char *err;
-   int err_offset;
-#else
-   regex_t rx;
-#endif
-   int failed;
-   char *regexp;
-};
 
 /*******************************************************************/
 
@@ -1200,7 +1311,6 @@ struct Topic
    char *topic_context;
    char *topic_name;
    double evc;
-   struct Rlist *synonyms;
    struct TopicAssociation *associations;
    struct Topic *next;
    };
@@ -1210,7 +1320,7 @@ struct TopicAssociation
    char *fwd_context;
    char *fwd_name;
    char *bwd_name;
-   struct Rlist *associates;
+   struct Item *associates;
    char *bwd_context;
    struct TopicAssociation *next;
    };
@@ -1224,20 +1334,17 @@ struct Occurrence
    struct Occurrence *next;
    };
 
+struct Inference
+   {
+   char *inference; // Promiser
+   char *precedent;
+   char *qualifier;
+   struct Inference *next;
+   };
 
 /*************************************************************************/
 /* SQL Database connectors                                               */
 /*************************************************************************/
-
-#ifdef HAVE_MYSQL_MYSQL_H
-#include <mysql/mysql.h>
-#endif
-
-#ifdef HAVE_PGSQL_LIBPQ_FE_H
- #include <pgsql/libpq-fe.h>
-#elif defined(HAVE_LIBPQ_FE_H)
- #include <libpq-fe.h>
-#endif
 
 enum cfdbtype
    {
@@ -1248,14 +1355,6 @@ enum cfdbtype
 
 typedef struct 
    {
-#ifdef HAVE_MYSQL_MYSQL_H
-   MYSQL my_conn;
-   MYSQL_RES *my_res;
-#endif
-#if defined HAVE_PGSQL_LIBPQ_FE_H || defined HAVE_LIBPQ_FE_H
-   PGconn *pq_conn;
-   PGresult   *pq_res;
-#endif
    int connected;
    int result;
    int row;
@@ -1265,6 +1364,7 @@ typedef struct
    char **rowdata;
    char *blank;
    enum cfdbtype type;
+   void *data; /* Generic pointer to RDBMS-specific data */
    }
 CfdbConn;
 
@@ -1832,9 +1932,12 @@ struct Attributes
 
    char *fwd_name;
    char *bwd_name;
+   struct Rlist *precedents;
+   struct Rlist *qualifiers;
    struct Rlist *associates;
    struct Rlist *represents;
    struct Rlist *synonyms;
+   struct Rlist *general;
    char *rep_type;
    char *path_root;
    char *web_root;
@@ -1851,6 +1954,46 @@ meter_comms_hour,
 meter_anomalies_day,
 meter_endmark
 };
+
+/*************************************************************************/
+/* definitions for reporting                                            */
+/*************************************************************************/
+
+typedef enum cdp_report
+   {
+   cdp_acls,
+   cdp_commands,
+   cdp_filechanges,
+   cdp_filediffs,
+   cdp_registry,
+   cdp_services,
+   cdp_unknown
+   }
+cdp_t;
+
+typedef enum basic_reports
+   {
+   cfrep_bundle,
+   cfrep_business,
+   cfrep_classes,
+   cfrep_promise_compliance,
+   cfrep_total_compliance,
+   cfrep_change,
+   cfrep_diff,
+   cfrep_lastseen,
+   cfrep_patch_avail,
+   cfrep_patch_status,
+   cfrep_performance,
+   cfrep_repaired,
+   cfrep_repair_summary,
+   cfrep_notkept,
+   cfrep_notkept_summary,
+   cfrep_setuid,
+   cfrep_software_installed,
+   cfrep_variables,
+   cfrep_unknown
+   }
+cfrep_t;
 
 /*************************************************************************/
 /* definitions for test suite                                            */
@@ -1875,19 +2018,32 @@ meter_endmark
 
 #define EMPTY(str) ((str == NULL) || (str[0] == '\0'))
 #define BEGINSWITH(str,start) (strncmp(str,start,strlen(start)) == 0)
+#define CFSTRDUP(str) ((str != NULL) ? strdup(str) : NULL)
+#define CFFREE(ptr) if(ptr) free(ptr)
 
 // classes not interesting in reports
 #define IGNORECLASS(c)                                                         \
  (strncmp(c,"Min",3) == 0 || strncmp(c,"Hr",2) == 0 || strcmp(c,"Q1") == 0     \
   || strcmp(c,"Q2") == 0 || strcmp(c,"Q3") == 0 || strcmp(c,"Q4") == 0         \
   || strncmp(c,"GMT_Hr",6) == 0  || strncmp(c,"Yr",2) == 0                     \
-  || strncmp(c,"Day",3) == 0 || strcmp(c,"Morning") == 0                       \
-  || strcmp(c,"Afternoon") == 0 || strcmp(c,"Evening") == 0                    \
-  || strcmp(c,"Night") == 0 || strcmp(c,"license_expired") == 0)
+  || strncmp(c,"Day",3) == 0 || strcmp(c,"license_expired") == 0               \
+  || strcmp(c,"any") == 0 || strcmp(c,"from_cfexecd") == 0                     \
+  || IsStrIn(c,MONTH_TEXT,false) || IsStrIn(c,DAY_TEXT,false)                  \
+  || IsStrIn(c,SHIFT_TEXT,false))
 
+// Date time classes 
+#define ISCLASS_DATETIME(c)						\
+  (strncmp(c,"Min",3) == 0 || strncmp(c,"Hr",2) == 0 || strcmp(c,"Q1") == 0 \
+    || strcmp(c,"Q2") == 0 || strcmp(c,"Q3") == 0 || strcmp(c,"Q4") == 0 \
+    || strncmp(c,"GMT_Hr",6) == 0  || strncmp(c,"Yr",2) == 0                     \
+   || strncmp(c,"Day",3) == 0 || IsStrIn(c,MONTH_TEXT,false)		\
+  || IsStrIn(c,DAY_TEXT,false) || IsStrIn(c,SHIFT_TEXT,false)                 \
+  || strncmp(c,"Lcycle",6) == 0)
 
 #include "prototypes3.h"
 
-#ifdef HAVE_LIBCFNOVA
+#ifdef HAVE_NOVA
 #include <cf.nova.h>
+#endif
+
 #endif

@@ -155,14 +155,20 @@ void NoteClassUsage(struct AlphaList baselist)
   CF_DBC *dbcp;
   void *stored;
   char *key,name[CF_BUFSIZE];
-  int i,ksize,vsize;
+  int i,j,ksize,vsize;
   struct Event e,entry,newe;
   double lsea = CF_WEEK * 52; /* expire after a year */
   time_t now = time(NULL);
   struct Item *ip,*list = NULL;
-  struct AlphaList *ap;
   double lastseen,delta2;
   double vtrue = 1.0;      /* end with a rough probability */
+
+/* Only do this for the default policy, too much "downgrading" otherwise */
+
+if (MINUSF) 
+   {
+   return;
+   }
 
 Debug("RecordClassUsage\n");
 
@@ -174,6 +180,30 @@ for (i = 0; i < CF_ALPHABETSIZE; i++)
          {
          Debug("Ignoring class %s (not packing)", ip->name);
          continue;
+         }
+
+      for (j = 0; j < 4; j++)
+         {
+         if (strcmp(ip->name,SHIFT_TEXT[j]) == 0)
+            {
+            continue;
+            }
+         }
+
+      for (j = 0; j < 7; j++)
+         {
+         if (strcmp(ip->name,DAY_TEXT[j]) == 0)
+            {
+            continue;
+            }
+         }
+
+      for (j = 0; j < 12; j++)
+         {
+         if (strcmp(ip->name,MONTH_TEXT[j]) == 0)
+            {
+            continue;
+            }
          }
    
       IdempPrependItem(&list,ip->name,NULL);
@@ -197,9 +227,9 @@ for (ip = list; ip != NULL; ip=ip->next)
       lastseen = now - e.t;
       newe.t = now;
       newe.Q.q = vtrue;
-      newe.Q.expect = GAverage(vtrue,e.Q.expect,0.3);
+      newe.Q.expect = GAverage(vtrue,e.Q.expect,0.7);
       delta2 = (vtrue - e.Q.expect)*(vtrue - e.Q.expect);
-      newe.Q.var = GAverage(delta2,e.Q.var,0.3);
+      newe.Q.var = GAverage(delta2,e.Q.var,0.7);
       }
    else
       {
@@ -229,6 +259,8 @@ for (ip = list; ip != NULL; ip=ip->next)
 if (!NewDBCursor(dbp,&dbcp))
    {
    CfOut(cf_inform,""," !! Unable to scan class db");
+   CloseDB(dbp);
+   DeleteItemList(list);
    return;
    }
 
@@ -238,7 +270,7 @@ while(NextDB(dbp,dbcp,&key,&ksize,&stored,&vsize))
    {
    double measure,av,var;
    time_t then;
-   char tbuf[CF_BUFSIZE],eventname[CF_BUFSIZE];
+   char eventname[CF_BUFSIZE];
 
    memset(eventname,0,CF_BUFSIZE);
    strncpy(eventname,(char *)key,ksize);
@@ -253,9 +285,6 @@ while(NextDB(dbp,dbcp,&key,&ksize,&stored,&vsize))
       var = entry.Q.var;
       lastseen = now - then;
             
-      snprintf(tbuf,CF_BUFSIZE-1,"%s",cf_ctime(&then));
-      tbuf[strlen(tbuf)-9] = '\0';                     /* Chop off second and year */
-
       if (lastseen > lsea)
          {
          Debug("Class usage record %s expired\n",eventname);
@@ -283,7 +312,7 @@ DeleteItemList(list);
 
 void LastSaw(char *username,char *ipaddress,unsigned char digest[EVP_MAX_MD_SIZE+1],enum roles role)
 
-{ char databuf[CF_BUFSIZE],varbuf[CF_BUFSIZE],rtype;
+{ char databuf[CF_BUFSIZE];
   time_t now = time(NULL);
   int known = false;
   struct Rlist *rp;
@@ -409,8 +438,6 @@ if (SERVER_KEYSEEN == NULL)
    return;
    }
 
-ThreadUnlock(cft_server_keyseen);
-
 
 if (BooleanControl("control_agent",CFA_CONTROLBODY[cfa_intermittency].lval))
    {
@@ -423,6 +450,7 @@ MapName(name);
 
 if (!OpenDB(name,&dbp))
    {
+   ThreadUnlock(cft_server_keyseen);
    return;
    }
 
@@ -431,6 +459,7 @@ if (!OpenDB(name,&dbp))
 
 if (!NewDBCursor(dbp,&dbcp))
    {
+   ThreadUnlock(cft_server_keyseen);
    CfOut(cf_inform,""," !! Unable to scan class db");
    return;
    }
@@ -447,8 +476,6 @@ while(NextDB(dbp,dbcp,&key,&ksize,&stored,&qsize))
       DeleteDB(dbp,key);
       }
 
-   ThreadLock(cft_server_keyseen);
-
    for (rp = SERVER_KEYSEEN; rp !=  NULL; rp=rp->next)
       {
       kp = (struct CfKeyBinding *) rp->item;
@@ -460,15 +487,11 @@ while(NextDB(dbp,dbcp,&key,&ksize,&stored,&qsize))
          }
       }
 
-   ThreadUnlock(cft_server_keyseen);
-
    }
 
 DeleteDBCursor(dbp,dbcp);
 
 /* Now perform updates with the latest data */
-
-ThreadLock(cft_server_keyseen);
 
 for (rp = SERVER_KEYSEEN; rp !=  NULL; rp=rp->next)
    {

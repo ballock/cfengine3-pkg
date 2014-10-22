@@ -64,7 +64,6 @@ extern struct BodySyntax CFEX_CONTROLBODY[];
 
 void StartServer(int argc,char **argv);
 int ScheduleRun(void);
-static char *timestamp(time_t stamp, char *buf, size_t len);
 void *LocalExec(void *scheduled_run);
 int FileChecksum(char *filename,unsigned char digest[EVP_MAX_MD_SIZE+1],char type);
 int CompareResult(char *filename,char *prev_file);
@@ -156,7 +155,6 @@ void CheckOpts(int argc,char **argv)
 
 { extern char *optarg;
   char arg[CF_BUFSIZE];
-  struct Item *actionList;
   int optindex = 0;
   int c;
   char ld_library_path[CF_BUFSIZE];
@@ -267,8 +265,7 @@ if (argv[optind] != NULL)
 
 void ThisAgentInit()
 
-{ char vbuff[CF_BUFSIZE];
-
+{
 umask(077);
 LOGGING = true;
 MAILTO[0] = '\0';
@@ -381,7 +378,7 @@ for (cp = ControlBodyConstraints(cf_executor); cp != NULL; cp=cp->next)
 
 void StartServer(int argc,char **argv)
 
-{ int pid,time_to_run = false;
+{ int time_to_run = false;
   time_t now = time(NULL);
   struct Promise *pp = NewPromise("exec_cfengine","the executor agent"); 
   struct Attributes dummyattr;
@@ -446,13 +443,14 @@ if (ONCE)
    LocalExec((void *)0);
    }
 else
-   { char **nargv;
-     int i;
+   {
 #ifdef HAVE_PTHREAD_H
-     pthread_t tid;
+   pthread_t tid;
 #endif
 
-#if defined NT && !(defined HAVE_LIBPTHREAD || defined BUILDTIN_GCC_THREAD) 
+#if defined NT && !(defined HAVE_LIBPTHREAD || defined BUILDTIN_GCC_THREAD)
+   int i;
+   char **nargv;
    /*
     * Append --once option to our arguments for spawned monitor process.
     */
@@ -532,8 +530,7 @@ void Apoptosis()
 
 { struct Promise pp = {0};
   struct Rlist *signals = NULL, *owners = NULL;
-  char mypid[32],pidrange[32];
-  char *psopts = GetProcessOptions();
+  char mypid[32];
   static char promiserBuf[CF_SMALLBUF];
 
 if (ONCE || VSYSTEMHARDCLASS == cfnt)
@@ -585,7 +582,7 @@ AppendConstraint(&(pp.conlist),"process_result",strdup("process_owner.process_co
 
 CfOut(cf_verbose,""," -> Looking for cf-execd processes owned by %s",mypid);
 
-if (LoadProcessTable(&PROCESSTABLE,psopts))
+if (LoadProcessTable(&PROCESSTABLE))
    {
    VerifyProcessesPromise(&pp);   
    }
@@ -660,23 +657,6 @@ return false;
 }
 
 /*************************************************************************/
-
-static char *timestamp(time_t stamp, char *buf, size_t len)
-
-{ struct tm *ltime;
- 
-ltime = localtime(&stamp);
-snprintf(buf, len, "%04d-%02d-%02d--%02d-%02d-%02d",
-         ltime->tm_year+1900,
-         ltime->tm_mon+1,
-         ltime->tm_mday,
-         ltime->tm_hour,
-         ltime->tm_min,
-         ltime->tm_sec);
-return buf;
-}
-
-/**************************************************************/
 
 void *LocalExec(void *scheduled_run)
 
@@ -881,7 +861,8 @@ int FileChecksum(char *filename,unsigned char digest[EVP_MAX_MD_SIZE+1],char typ
 
 { FILE *file;
   EVP_MD_CTX context;
-  int len, md_len;
+  int len;
+  unsigned int md_len;
   unsigned char buffer[1024];
   const EVP_MD *md = NULL;
 
@@ -909,7 +890,7 @@ else
    
    EVP_DigestInit(&context,md);
 
-   while (len = fread(buffer,1,1024,file))
+   while ((len = fread(buffer,1,1024,file)))
       {
       EVP_DigestUpdate(&context,buffer,len);
       }
@@ -927,8 +908,8 @@ return 0;
 int CompareResult(char *filename,char *prev_file)
 
 { int i;
-  char digest1[EVP_MAX_MD_SIZE+1];
-  char digest2[EVP_MAX_MD_SIZE+1];
+  unsigned char digest1[EVP_MAX_MD_SIZE+1];
+  unsigned char digest2[EVP_MAX_MD_SIZE+1];
   int  md_len1, md_len2;
   FILE *fp;
   int rtn = 0;
@@ -975,7 +956,7 @@ unlink(prev_file);
 
  if(!LinkOrCopy(filename,prev_file,true))
    {
-     CfOut(cf_inform,"","Could symlink or copy %s to %s",filename,prev_file);
+     CfOut(cf_inform,"","Could not symlink or copy %s to %s",filename,prev_file);
      rtn = 1;
    }
 
@@ -988,19 +969,13 @@ return(rtn);
 void MailResult(char *file,char *to)
 
 { int sd, sent, count = 0, anomaly = false;
- char domain[256], prev_file[CF_BUFSIZE],vbuff[CF_BUFSIZE];
+  char prev_file[CF_BUFSIZE],vbuff[CF_BUFSIZE];
   struct hostent *hp;
   struct sockaddr_in raddr;
   struct servent *server;
   struct stat statbuf;
   time_t now = time(NULL);
   FILE *fp;
-
-if ((strlen(VMAILSERVER) == 0) || (strlen(to) == 0))
-   {
-   /* Syslog should have done this */
-   return;
-   }
 
 CfOut(cf_verbose,"","Mail result...\n");
 
@@ -1022,6 +997,13 @@ if (statbuf.st_size == 0)
 if (CompareResult(file,prev_file) == 0) 
    {
    CfOut(cf_verbose,"","Previous output is the same as current so do not mail it\n");
+   return;
+   }
+
+if ((strlen(VMAILSERVER) == 0) || (strlen(to) == 0))
+   {
+   /* Syslog should have done this */
+   CfOut(cf_verbose, "", "Empty mail server or address - skipping");
    return;
    }
 
