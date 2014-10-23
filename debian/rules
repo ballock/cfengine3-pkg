@@ -35,7 +35,6 @@ override_dh_strip:
 
 override_dh_installman:
 	## Man pages are created with an undocumented flag
-	#
 	/bin/mkdir -p $(CURDIR)/debian/cfengine3/usr/share/man/man8/
 	for p in cf-agent cf-key cf-promises cf-runagent cf-execd cf-serverd cf-monitord; \
 		do $(CURDIR)/$$p/$$p -M > $(CURDIR)/debian/cfengine3/usr/share/man/man8/$$p.8 ;\
@@ -46,27 +45,3 @@ override_dh_installdocs:
 	/bin/mv $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README.md \
 		$(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README
 	dh_installdocs
-
-#override_dh_install:
-#	dh_testdir
-#	dh_testroot
-#	dh_prep
-#	dh_installdirs
-#
-#	# Add here commands to install the package into debian/cfengine3.
-#	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
-#	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/sbin
-#	/bin/mv $(CURDIR)/debian/cfengine3/usr/bin $(CURDIR)/debian/cfengine3/usr/sbin
-#
-#	/bin/rmdir $(CURDIR)/debian/cfengine3/var/lib/cfengine3/inputs
-#	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
-#
-#	# libpromises3 package.
-#	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so.* \
-##                $(CURDIR)/debian/libpromises3/usr/lib
-#	# Get rid of the symlink, no other program will be able to build on this library.
-#	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so
-#	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/lib
-#
-#	# Run the install
-#	dh_install
