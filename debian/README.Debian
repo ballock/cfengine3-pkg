@@ -1,12 +1,11 @@
 There are some tweaks which were applied to the standard cfengine3 installation
 and you should be aware of them:
 
-*) cfengine3 is FHS, that means that, unlike the original, we log in /var/log,
-the binaries are located in /usr/sbin; for upstream compatibility we have the
-following symlinks:
+*) cfengine3 is FHS, that means that, unlike the original, the binaries are
+located in /usr/sbin; for upstream compatibility we have the following
+symlink:
 
-/etc/cfengine3 -> /var/lib/cfengine3/inputs
-/usr/sbin      -> /var/lib/cfengine3/bin§
+/usr/sbin      -> /var/lib/cfengine3/bin
 
 *) to enable the daemons you need to modify /etc/default/cfengine3 and set the
 proper variables; the daemons won't be started unless there is an
