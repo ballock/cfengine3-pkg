@@ -33,10 +33,6 @@ override_dh_compress:
 override_dh_strip:
 	dh_strip --dbg-package=cfengine3-dbg
 
-override_dh_installchangelogs:
-	rm debian/cfengine3/usr/share/doc/cfengine3/ChangeLog
-	dh_installchangelogs
-
 override_dh_install:
 	dh_testdir
 	dh_testroot
@@ -51,7 +47,7 @@ override_dh_install:
 #	/bin/rmdir $(CURDIR)/debian/cfengine3/var/lib/cfengine3/inputs
 #	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
 	/bin/mv $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README.md \
-#                $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README
+                $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README
 
 	# libpromises3 package.
 #	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so.* \
