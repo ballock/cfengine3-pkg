@@ -1,13 +1,14 @@
 cfengine3 (3.6.2-1) unstable; urgency=low
 
-  * New upstream release
-    + big thanks to Brian Bennett and debian-team@cfengine.com!
+  * New upstream release (Closes: 609366, 699809)
+    + big thanks to Brian Bennett, Bas van der Vlies and
+      debian-team@cfengine.com!
     + no longer using /etc/cfengine3 as repository for the state files;
       documented that in NEWS.Debian
   * debian/postinst:
     + added code to migrate the files contained in /etc/cfengine3 to
      /var/lib/cfengine3 if and only if the latter is a symlink to the directory
-     in /etc.
+     in /etc (Closes: 611659)
   * debian/control:
     + added libpromises3 as output of the build process
     + Standards-Version updated to 3.9.6
@@ -16,7 +17,9 @@ cfengine3 (3.6.2-1) unstable; urgency=low
   * debian/patches:
     + major cleanup done, some patches adapted to the new code
   * debian/NEWS:
-    + added this file to announce the demise of the inputs symlink.
+    + added this file to announce the demise of the inputs symlink
+  * debian/cfengine3.default:
+    + Brian fixed the variable names sourced by the init scirpt (Closes: 602404)
 
  -- Antonio Radici <antonio@debian.org>  Tue, 21 Oct 2014 14:49:40 +0000
 
