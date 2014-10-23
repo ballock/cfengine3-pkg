@@ -60,4 +60,4 @@ override_dh_auto_install:
 	dh_auto_install -Dmasterfiles
 
 override_dh_install:
-	dh_install --exclude=examples
+	dh_install --exclude=examples --exclude=ChangeLog
