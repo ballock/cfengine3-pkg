@@ -28,6 +28,9 @@ override_dh_clean:
 	dh_autoreconf_clean
 	dh_clean --exclude=#008.cf#
 
+override_dh_installchangelogs:
+	dh_installchangelogs -X=ChangeLog
+
 override_dh_auto_clean:
 	dh_auto_clean
 	dh_auto_clean -Dmasterfiles
