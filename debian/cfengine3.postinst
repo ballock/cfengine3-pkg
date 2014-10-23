@@ -60,7 +60,7 @@ move_inputs_if_needed() {
     fi
 }
 
-copy_masterfiles {
+copy_masterfiles() {
     # If the masterfiles directory is empty we are going to copy the shared
     # masterfiles there.
     if [ -f "$WORKDIR/masterfiles" ] && [ ! $(ls -A $WORKDIR/masterfiles) ]; then
