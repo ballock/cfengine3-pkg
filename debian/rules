@@ -22,10 +22,15 @@ override_dh_auto_configure:
 			--mandir=\$${prefix}/share/man \
 			CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,relro" \
 			CPPFLAGS=-D_FORTIFY_SOURCE=2
+	cd masterfiles && ./autogen.sh --prefix=/usr/share/doc/cfengine3 --with-core=$(CURDIR)
 
 override_dh_clean:
 	dh_autoreconf_clean
 	dh_clean --exclude=#008.cf#
+
+override_dh_auto_clean:
+	dh_auto_clean
+	dh_auto_clean -Dmasterfiles
 
 override_dh_compress:
 	dh_compress -X.cf
@@ -45,3 +50,7 @@ override_dh_installdocs:
 	/bin/mv $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README.md \
 		$(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README
 	dh_installdocs
+
+override_dh_auto_install:
+	dh_auto_install
+	dh_auto_install -Dmasterfiles
