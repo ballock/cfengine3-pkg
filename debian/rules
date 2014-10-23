@@ -45,20 +45,20 @@ override_dh_install:
 
 	# Add here commands to install the package into debian/cfengine3.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/cfengine3 install
-	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/sbin
-	/bin/mv $(CURDIR)/debian/cfengine3/usr/bin $(CURDIR)/debian/cfengine3/usr/sbin
+#	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/sbin
+#	/bin/mv $(CURDIR)/debian/cfengine3/usr/bin $(CURDIR)/debian/cfengine3/usr/sbin
 
-	/bin/rmdir $(CURDIR)/debian/cfengine3/var/lib/cfengine3/inputs
-	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
-	/bin/mv $(CURDIR)/debian/cfengine3/usr/share/doc/cfengine3/README.md \
-                $(CURDIR)/debian/cfengine3/usr/share/doc/cfengine3/README
+#	/bin/rmdir $(CURDIR)/debian/cfengine3/var/lib/cfengine3/inputs
+#	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/*.la
+#	/bin/mv $(CURDIR)/debian/cfengine3/usr/share/doc/cfengine3/README.md \
+#                $(CURDIR)/debian/cfengine3/usr/share/doc/cfengine3/README
 
 	# libpromises3 package.
-	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so.* \
-                $(CURDIR)/debian/libpromises3/usr/lib
+#	/bin/mv $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so.* \
+#                $(CURDIR)/debian/libpromises3/usr/lib
 	# Get rid of the symlink, no other program will be able to build on this library.
-	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so
-	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/lib
+#	/bin/rm $(CURDIR)/debian/cfengine3/usr/lib/libpromises.so
+#	/bin/rmdir $(CURDIR)/debian/cfengine3/usr/lib
 
 	## Man pages are created with an undocumented flag
 	#
@@ -67,3 +67,5 @@ override_dh_install:
     do \
         $(CURDIR)/$$p/$$p -M > $(CURDIR)/debian/cfengine3/usr/share/man/man8/$$p.8 ;\
     done
+	# Run the install
+	dh_install

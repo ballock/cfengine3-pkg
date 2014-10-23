@@ -1,3 +1,3 @@
-debian/tmp/usr/sbin/*               usr/sbin/
-debian/tmp/usr/share/man/*          usr/share/man/
-debian/tmp/usr/share/doc/cfengine/* usr/share/doc/cfengine3/
+debian/cfengine3/usr/bin/*         usr/sbin/
+debian/cfengine3/usr/share/man/
+debian/cfengine3/usr/share/doc/cfengine3/README.md usr/share/doc/cfengine3/README
