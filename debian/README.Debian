@@ -16,7 +16,10 @@ agent which is fetching files from a policy hub), then you could experiment
 with the masterfiles library (the former Community Open Promise Body Library),
 those files are located in:
 
-/usr/share/doc/cfengine3/masterfiles/
+/usr/share/cfengine3/masterfiles/
+
+Additionally, if your /var/lib/cfengine3/masterfiles directory was empty at the
+time of the installation, you got these files copied over already.
 
 *) By default we are not starting any daemon, in most of your installations you
 will only need the cfagent with a proper configuration file
