@@ -63,7 +63,7 @@ move_inputs_if_needed() {
 copy_masterfiles() {
     # If the masterfiles directory is empty we are going to copy the shared
     # masterfiles there.
-    if [ -d "$WORKDIR/masterfiles" ] && [ ! $(ls -A $WORKDIR/masterfiles) ]; then
+    if [ -d "$WORKDIR/masterfiles" ] && [ ! "$(ls -A $WORKDIR/masterfiles)" ]; then
         cp -a /usr/share/cfengine3/masterfiles/* $WORKDIR/masterfiles
     fi
 }
