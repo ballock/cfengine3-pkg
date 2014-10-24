@@ -5,3 +5,4 @@ var/lib/cfengine3/inputs
 var/lib/cfengine3/ppkeys
 var/lib/cfengine3/outputs
 var/lib/cfengine3/modules
+var/lib/cfengine3/masterfiles
