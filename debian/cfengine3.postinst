@@ -21,10 +21,13 @@ WORKDIR=/var/lib/cfengine3
 INPUTS=$WORKDIR/inputs
 
 set_permissions() {
-    chmod 700 $WORKDIR/ppkeys
-    chmod 700 $WORKDIR/modules
-    chmod 700 $WORKDIR/inputs
-    chmod 700 $WORKDIR/outputs
+    # If people have already their own set of files we do not touch the
+    # directory permissions, assuming that everything is OK already.
+    for dir in ppkeys modules inputs outputs; do
+	if [ -d "$WORKDIR/$dir" ] && [ ! "$(ls -A $WORKDIR/$dir)" ]; then
+	    chmod 700 $WORKDIR/$dir
+	fi
+    done
 }
 
 make_key() {
