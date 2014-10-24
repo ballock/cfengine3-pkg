@@ -37,7 +37,7 @@ move_inputs_if_needed() {
     # Migration function: if the inputdir is pointing to /etc/cfengine3, then
     # create a new input dir and copy the files.
    
-    if [ ! -L "$INPUTS" ]; then
+    if [ ! -L "$INPUTS" ] || [ ! -d "/etc/cfengine3" ]; then
         return
     fi
 
