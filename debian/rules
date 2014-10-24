@@ -50,11 +50,6 @@ override_dh_installman:
         done
 	dh_installman
 
-override_dh_installdocs:
-	/bin/mv $(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README.md \
-		$(CURDIR)/debian/tmp/usr/share/doc/cfengine3/README
-	dh_installdocs
-
 override_dh_auto_install:
 	dh_auto_install
 	dh_auto_install -Dmasterfiles
