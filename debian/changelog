@@ -23,6 +23,8 @@ cfengine3 (3.6.2-1) unstable; urgency=low
     + added this file to announce the demise of the inputs symlink
   * debian/cfengine3.default:
     + Brian fixed the variable names sourced by the init scirpt (Closes: 602404)
+  * debian/watch:
+    + updated to pick up the source from the right URL
 
  -- Antonio Radici <antonio@debian.org>  Tue, 21 Oct 2014 14:49:40 +0000
 
