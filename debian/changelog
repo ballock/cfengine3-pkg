@@ -1,3 +1,10 @@
+cfengine3 (3.6.2-4) unstable; urgency=medium
+
+  * debian/patches:
+    + fix_kfreebsd_build fixed after testing on a porterbox.
+
+ -- Antonio Radici <antonio@debian.org>  Sun, 26 Oct 2014 09:42:11 +0000
+
 cfengine3 (3.6.2-3) unstable; urgency=medium
 
   * debian/patches:
