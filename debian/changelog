@@ -1,3 +1,9 @@
+cfengine3 (3.6.4-0.1) UNRELEASED; urgency=medium
+
+  * Merged new upstream version (minor bugfix release).
+
+ -- Bolesław Tokarski <boleslaw.tokarski@opera.com>  Thu, 26 Feb 2015 22:47:25 +0100
+
 cfengine3 (3.6.2-4) unstable; urgency=medium
 
   * debian/patches:
