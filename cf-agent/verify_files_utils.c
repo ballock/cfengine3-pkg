@@ -776,7 +776,7 @@ static PromiseResult SourceSearchAndCopy(EvalContext *ctx, const char *from, cha
         if ((attr.recursion.travlinks) || (attr.copy.link_type == FILE_LINK_TYPE_NONE))
         {
             /* No point in checking if there are untrusted symlinks here,
-               since this is from a trusted source, by defintion */
+               since this is from a trusted source, by definition */
 
             if (cf_stat(newfrom, &sb, attr.copy, conn) == -1)
             {
@@ -1846,12 +1846,22 @@ static PromiseResult VerifyDelete(EvalContext *ctx, char *path, struct stat *sb,
                     snprintf(buf, sizeof(buf), "%s", lastnode);
                 }
 
-                if (rmdir(buf) == -1)
+                int ret = rmdir(buf);
+                if (ret == -1 && errno != EEXIST && errno != ENOTEMPTY)
                 {
                     cfPS(ctx, LOG_LEVEL_ERR, PROMISE_RESULT_FAIL, pp, attr,
                          "Delete directory '%s' failed (cannot delete node called '%s'). (rmdir: %s)",
                          path, buf, GetErrorStr());
                     result = PromiseResultUpdate(result, PROMISE_RESULT_FAIL);
+                }
+                else if (ret == -1 &&
+                         (errno == EEXIST || errno == ENOTEMPTY))
+                {
+                    /* It's never allowed to delete non-empty directories, they
+                     * are silently skipped. */
+                    Log(LOG_LEVEL_VERBOSE,
+                        "Delete directory '%s' not empty, skipping", buf);
+                    return result;                   /* PROMISE_RESULT_NOOP */
                 }
                 else
                 {
@@ -1873,7 +1883,7 @@ static PromiseResult VerifyDelete(EvalContext *ctx, char *path, struct stat *sb,
 static PromiseResult TouchFile(EvalContext *ctx, char *path, Attributes attr, const Promise *pp)
 {
     PromiseResult result = PROMISE_RESULT_NOOP;
-    if (!DONTDO)
+    if (!DONTDO && attr.transaction.action == cfa_fix)
     {
         if (utime(path, NULL) != -1)
         {
@@ -1889,7 +1899,9 @@ static PromiseResult TouchFile(EvalContext *ctx, char *path, Attributes attr, co
     }
     else
     {
-        Log(LOG_LEVEL_ERR, "Need to touch (update timestamps) path '%s'", path);
+        cfPS(ctx, LOG_LEVEL_ERR, PROMISE_RESULT_WARN, pp, attr,
+             "Need to touch (update time stamps) for '%s', but only a warning was promised!", path);
+        result = PromiseResultUpdate(result, PROMISE_RESULT_WARN);
     }
 
     return result;
@@ -2139,7 +2151,7 @@ int DepthSearch(EvalContext *ctx, char *name, struct stat *sb, int rlevel, Attri
             Log(LOG_LEVEL_ERR, "Failed to chdir into '%s'. (chdir: '%s')", basedir, GetErrorStr());
             return false;
         }
-        if (!attr.haveselect || SelectLeaf(ctx, path, sb, attr.select))
+        if (!attr.haveselect || SelectLeaf(ctx, name, sb, attr.select))
         {
             VerifyFileLeaf(ctx, name, sb, attr, pp, result);
             return true;
@@ -2155,8 +2167,6 @@ int DepthSearch(EvalContext *ctx, char *name, struct stat *sb, int rlevel, Attri
         Log(LOG_LEVEL_WARNING, "Very deep nesting of directories (>%d deep) for '%s' (Aborting files)", rlevel, name);
         return false;
     }
-
-    memset(path, 0, CF_BUFSIZE);
 
     if (!PushDirState(ctx, name, sb))
     {
@@ -2188,7 +2198,11 @@ int DepthSearch(EvalContext *ctx, char *name, struct stat *sb, int rlevel, Attri
             continue;
         }
 
-        strcpy(path, name);
+        memset(path, 0, sizeof(path));
+        if (strlcpy(path, name, sizeof(path)-2) >= sizeof(path)-2)
+        {
+            Log(LOG_LEVEL_ERR, "Truncated filename %s while performing depth-first search", path);
+        }
         AddSlash(path);
 
         if (!JoinPath(path, dirp->d_name))
@@ -2447,7 +2461,6 @@ static PromiseResult CopyFileSources(EvalContext *ctx, char *destination, Attrib
     char vbuff[CF_BUFSIZE];
     struct stat ssb, dsb;
     struct timespec start;
-    char eventname[CF_BUFSIZE];
 
     if (conn != NULL && (!conn->authenticated))
     {
@@ -2516,10 +2529,16 @@ static PromiseResult CopyFileSources(EvalContext *ctx, char *destination, Attrib
 
     DeleteCompressedArray(inode_cache);
 
-    snprintf(eventname, CF_BUFSIZE - 1, "Copy(%s:%s > %s)",
-             conn ? conn->this_server : "localhost", BufferData(source), destination);
+    const char *mid = PromiseGetConstraintAsRval(pp, "measurement_class", RVAL_TYPE_SCALAR);
+    if (mid)
+    {
+        char eventname[CF_BUFSIZE];
+        snprintf(eventname, CF_BUFSIZE - 1, "Copy(%s:%s > %s)",
+                 conn ? conn->this_server : "localhost",
+                 BufferData(source), destination);
 
-    EndMeasure(eventname, start);
+        EndMeasure(eventname, start);
+    }
 
     BufferDestroy(source);
     return result;
@@ -2692,16 +2711,16 @@ PromiseResult ScheduleLinkOperation(EvalContext *ctx, char *destination, char *s
     switch (attr.link.link_type)
     {
     case FILE_LINK_TYPE_SYMLINK:
-        VerifyLink(ctx, destination, source, attr, pp);
+        result = VerifyLink(ctx, destination, source, attr, pp);
         break;
     case FILE_LINK_TYPE_HARDLINK:
-        VerifyHardLink(ctx, destination, source, attr, pp);
+        result = VerifyHardLink(ctx, destination, source, attr, pp);
         break;
     case FILE_LINK_TYPE_RELATIVE:
-        VerifyRelativeLink(ctx, destination, source, attr, pp);
+        result = VerifyRelativeLink(ctx, destination, source, attr, pp);
         break;
     case FILE_LINK_TYPE_ABSOLUTE:
-        VerifyAbsoluteLink(ctx, destination, source, attr, pp);
+        result = VerifyAbsoluteLink(ctx, destination, source, attr, pp);
         break;
     default:
         Log(LOG_LEVEL_ERR, "Unknown link type - should not happen.");

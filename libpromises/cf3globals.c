@@ -54,7 +54,7 @@ int LASTSEENEXPIREAFTER = SECONDS_PER_WEEK; /* GLOBAL_P */
 char POLICY_SERVER[CF_MAX_IP_LEN] = ""; /* GLOBAL_X */
 
 /*****************************************************************************/
-/* Compatability infrastructure                                              */
+/* Compatibility infrastructure                                              */
 /*****************************************************************************/
 
 bool DONTDO = false; /* GLOBAL_A */
@@ -121,7 +121,7 @@ pid_t ALARM_PID = -1; /* GLOBAL_X */
 
   Used as a default value for maxfilesize attribute in policy
 */
-int EDITFILESIZE = 10000; /* GLOBAL_P */
+int EDITFILESIZE = 100000; /* GLOBAL_P */
 
 /*
   Set in cf-agent (from control body) and GenericAgentInitialize.

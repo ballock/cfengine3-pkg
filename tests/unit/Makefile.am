@@ -1,3 +1,26 @@
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 # Just recursively include in dist tarball all data we need for unit tests
 EXTRA_DIST = data
 
@@ -45,7 +68,8 @@ libstr_la_LIBADD = libtest.la
 
 
 check_LTLIBRARIES += libdb.la
-libdb_la_SOURCES = ../../libpromises/dbm_api.c \
+libdb_la_SOURCES = db_stubs.c \
+	../../libpromises/dbm_api.c \
 	../../libpromises/mutex.c \
 	../../libpromises/dbm_quick.c \
 	../../libpromises/dbm_tokyocab.c \
@@ -119,6 +143,7 @@ check_PROGRAMS = \
 	string_expressions_test \
 	var_expressions_test \
 	process_terminate_unix_test \
+	process_test \
 	exec-config-test \
 	generic_agent_test \
 	syntax_test \
@@ -156,6 +181,15 @@ check_SCRIPTS = dynamic_dependency_test.sh
 EXTRA_DIST   += dynamic_dependency_test.sh
 
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
+
+if AIX
+XFAIL_TESTS = evalfunction_test     # Redmine 6318
+XFAIL_TESTS += set_domainname_test  # Redmine 6317
+endif
+
+if HPUX
+XFAIL_TESTS = mon_load_test # Redmine #3569
+endif
 
 #
 # OS X uses real system calls instead of our stubs unless this option is used
@@ -293,6 +327,8 @@ connection_management_test_LDADD = ../../libpromises/libpromises.la libtest.la .
 rlist_test_SOURCES = rlist_test.c \
        ../../libpromises/rlist.c ../../libutils/logging.c
 rlist_test_LDADD = libtest.la libstr.la ../../libpromises/libpromises.la
+
+process_test_LDADD = libtest.la ../../libpromises/libpromises.la
 
 if LINUX
 

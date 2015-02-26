@@ -84,7 +84,6 @@
 
 // HP-UX: pstat_getproc(2) on init (pid 1)
 #if defined(__hpux)
-# define _PSTAT64
 # include <sys/param.h>
 # include <sys/pstat.h>
 # define BOOT_TIME_WITH_PSTAT_GETPROC
@@ -508,6 +507,7 @@ static void GetNameInfo3(EvalContext *ctx)
                     found = true;
 
                     VSYSTEMHARDCLASS = (PlatformContext) i;
+                    VPSHARDCLASS = (PlatformContext) i; /* this one can be overriden at vz detection */
                     EvalContextVariablePutSpecial(ctx, SPECIAL_SCOPE_SYS, "class", CLASSTEXT[i], CF_DATA_TYPE_STRING, "inventory,source=agent,attribute_name=OS type");
                     break;
                 }
@@ -1442,6 +1442,7 @@ static int Linux_Redhat_Version(EvalContext *ctx)
 #define REDHAT_C_ID "Red Hat Enterprise Linux Client"
 #define REDHAT_S_ID "Red Hat Enterprise Linux Server"
 #define REDHAT_W_ID "Red Hat Enterprise Linux Workstation"
+#define REDHAT_CN_ID "Red Hat Enterprise Linux ComputerNode"
 #define MANDRAKE_ID "Linux Mandrake"
 #define MANDRAKE_10_1_ID "Mandrakelinux"
 #define WHITEBOX_ID "White Box Enterprise Linux"
@@ -1516,6 +1517,11 @@ static int Linux_Redhat_Version(EvalContext *ctx)
         vendor = "redhat";
         edition = "c";
     }
+    else if (!strncmp(relstring, REDHAT_CN_ID, strlen(REDHAT_CN_ID)))
+    {
+        vendor = "redhat";
+        edition = "cn";
+    }
     else if (!strncmp(relstring, REDHAT_ID, strlen(REDHAT_ID)))
     {
         vendor = "redhat";
@@ -1564,7 +1570,7 @@ static int Linux_Redhat_Version(EvalContext *ctx)
 
 /* Now, grok the release.  For AS, we neglect the AS at the end of the
  * numerical release because we already figured out that it *is* AS
- * from the infomation above.  We assume that all the strings will
+ * from the information above.  We assume that all the strings will
  * have the word 'release' before the numerical release.
  */
 
@@ -2365,6 +2371,15 @@ static void OpenVZ_Detect(EvalContext *ctx)
         if (stat(OPENVZ_VZPS_FILE, &statbuf) != -1)
         {
             EvalContextClassPutHard(ctx, "virt_host_vz_vzps", "inventory,attribute_name=Virtual host,source=agent");
+            /* here we must redefine the value of VPSHARDCLASS */
+            for (int i = 0; i < PLATFORM_CONTEXT_MAX; i++)
+            {
+                if (!strcmp(CLASSATTRIBUTES[i][0], "virt_host_vz_vzps"))
+                {
+                   VPSHARDCLASS = (PlatformContext) i;
+                   break;
+                }
+            }
         }
         else
         {

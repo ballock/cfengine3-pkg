@@ -74,7 +74,7 @@ substituted directly for a LIST is not iterated, but dropped into
 place, i.e. in list-lvals and the promisee (since this would be
 equivalent to a re-concatenation of the expanded separate promises)
 
-Any list variable occuring within a scalar or in place of a scalar
+Any list variable occurring within a scalar or in place of a scalar
 is assumed to be iterated i.e. $(name).
 
 To expand a promise, we build temporary hash tables. There are two
@@ -206,7 +206,16 @@ static PromiseResult ExpandPromiseAndDo(EvalContext *ctx, const Promise *pp,
 
         PromiseResult iteration_result = ActOnPromise(ctx, pexp, param);
 
-        NotifyDependantPromises(ctx, pexp, iteration_result);
+        // Redmine#6484 
+        // Only during pre-evaluation ActOnPromise is set to be a pointer to 
+        // CommonEvalPromise. While doing CommonEvalPromise check all the 
+        // handles should be not collected and dependant promises should not
+        // be notified.
+        if (ActOnPromise != &CommonEvalPromise)
+        {
+            NotifyDependantPromises(ctx, pexp, iteration_result);
+        }
+            
         result = PromiseResultUpdate(result, iteration_result);
 
         if (strcmp(pp->parent_promise_type->name, "vars") == 0 || strcmp(pp->parent_promise_type->name, "meta") == 0)
@@ -885,6 +894,25 @@ static void CopyLocalizedReferencesToBundleScope(EvalContext *ctx,
     }
 }
 
+void BundleResolvePromiseType(EvalContext *ctx, const Bundle *bundle, const char *type, PromiseActuator *actuator)
+{
+    for (size_t j = 0; j < SeqLength(bundle->promise_types); j++)
+    {
+        PromiseType *pt = SeqAt(bundle->promise_types, j);
+
+        if (strcmp(pt->name, type) == 0)
+        {
+            EvalContextStackPushPromiseTypeFrame(ctx, pt);
+            for (size_t i = 0; i < SeqLength(pt->promises); i++)
+            {
+                Promise *pp = SeqAt(pt->promises, i);
+                ExpandPromise(ctx, pp, actuator, NULL);
+            }
+            EvalContextStackPopFrame(ctx);
+        }
+    }
+}
+
 void BundleResolve(EvalContext *ctx, const Bundle *bundle)
 {
     Log(LOG_LEVEL_DEBUG, "Resolving variables in bundle '%s' '%s'",
@@ -892,37 +920,9 @@ void BundleResolve(EvalContext *ctx, const Bundle *bundle)
 
     if (strcmp(bundle->type, "common") == 0)
     {
-        for (size_t j = 0; j < SeqLength(bundle->promise_types); j++)
-        {
-            PromiseType *pt = SeqAt(bundle->promise_types, j);
-            if (strcmp(pt->name, "classes") == 0)
-            {
-                EvalContextStackPushPromiseTypeFrame(ctx, pt);
-                for (size_t i = 0; i < SeqLength(pt->promises); i++)
-                {
-                    Promise *pp = SeqAt(pt->promises, i);
-                    ExpandPromise(ctx, pp, VerifyClassPromise, NULL);
-                }
-                EvalContextStackPopFrame(ctx);
-            }
-        }
+        BundleResolvePromiseType(ctx, bundle, "classes", VerifyClassPromise);
     }
-
-    for (size_t j = 0; j < SeqLength(bundle->promise_types); j++)
-    {
-        PromiseType *pt = SeqAt(bundle->promise_types, j);
-
-        if (strcmp(pt->name, "vars") == 0)
-        {
-            EvalContextStackPushPromiseTypeFrame(ctx, pt);
-            for (size_t i = 0; i < SeqLength(pt->promises); i++)
-            {
-                Promise *pp = SeqAt(pt->promises, i);
-                ExpandPromise(ctx, pp, (PromiseActuator*)VerifyVarPromise, NULL);
-            }
-            EvalContextStackPopFrame(ctx);
-        }
-    }
+    BundleResolvePromiseType(ctx, bundle, "vars", (PromiseActuator*)VerifyVarPromise);
 }
 
 ProtocolVersion ProtocolVersionParse(const char *s)

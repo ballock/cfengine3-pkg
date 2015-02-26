@@ -1,3 +1,26 @@
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 AM_CPPFLAGS = $(ENTERPRISE_CFLAGS) \
 	-I$(top_srcdir)/libpromises \
 	-I$(top_srcdir)/libutils \
@@ -36,16 +59,20 @@ endif
 
 EXTRA_DIST = default.cf.sub dcs.cf.sub plucked.cf.sub testall dummy_etc
 
-TESTS = testall
+TESTS =
 TESTS_ENVIRONMENT = env \
 	AGENT=`pwd`/../../cf-agent/cf-agent \
 	CF_PROMISES=`pwd`/../../cf-promises/cf-promises \
 	CF_SERVERD=`pwd`/../../cf-serverd/cf-serverd \
 	CF_KEY=`pwd`/../../cf-key/cf-key \
+	RPMVERCMP=`pwd`/../../ext/rpmvercmp \
 	MOCK_PACKAGE_MANAGER=`pwd`/mock_package_manager
 if !HAVE_LIBXML2
 TESTS_ENVIRONMENT += LIBXML2_TESTS=0
 endif
+
+check-local:
+	@+MAKE=$(MAKE) ./testall
 
 dist-hook:
 	cd $(srcdir); tar -c -f - [0-9]* | tar -x -C $(abspath $(distdir)) -f -
@@ -55,4 +82,4 @@ CLEANFILES = *.gcno *.gcda
 
 pluck:
 	echo '### This is an auto-generated file, see Makefile.am and `make pluck` ###' > plucked.cf.sub
-	../../contrib/cf-locate/cf-locate -f -p '( if_|warn_only|INI_section|kept_successful_command|edit_line|set_user_field|set_variable_values\(|edit_field|set_line_based|location|replace_with|_cp|_dcp|empty|shell|immediate|perms| m\b|recurse|tidy| all|classes_generic| start|always|^value|edit_field line|insert_lines|(link|copy)from| file_mustache| (file|dir)_(copy|tidy|sync|make|empty|link|hardlink))' ../../../masterfiles/lib/3.6 >> plucked.cf.sub
+	../../contrib/cf-locate/cf-locate -f -p '( if_|run_|warn_only|INI_section|kept_successful_command|edit_line|set_user_field|set_variable_values\(|edit_field|set_line_based|location|replace_with|_cp|_dcp|empty|shell|immediate|perms| m\b|recurse|tidy| all|classes_generic| start|always|^value|edit_field line|insert_lines|(link|copy)from| file_mustache| (file|dir)_(copy|tidy|sync|make|empty|link|hardlink))' ../../../masterfiles/lib/3.6 >> plucked.cf.sub

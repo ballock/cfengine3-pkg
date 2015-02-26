@@ -380,7 +380,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 workdir = @workdir@
 AM_LDFLAGS = 
-AM_CPPFLAGS = 
+AM_CPPFLAGS = -I$(top_srcdir)/libutils # platform.h
 LDADD = ../libcompat/libcompat.la
 cf_upgrade_SOURCES = \
     alloc-mini.c alloc-mini.h \

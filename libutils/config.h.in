@@ -337,7 +337,7 @@
 /* Define to 1 if you have the `fgetpwent' function. */
 #undef HAVE_FGETPWENT
 
-/* Define to 1 if you have the `fgetspent' function. */
+/* Define if fgetspent is available */
 #undef HAVE_FGETSPENT
 
 /* Define to 1 if you have the `fpathconf' function. */
@@ -454,6 +454,9 @@
 /* Define to 1 if you have the `rt' library (-lrt). */
 #undef HAVE_LIBRT
 
+/* Define if -lsec is available */
+#undef HAVE_LIBSEC
+
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
@@ -528,6 +531,9 @@
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
+
+/* Define to 1 if you have the <net/if_arp.h> header file. */
+#undef HAVE_NET_IF_ARP_H
 
 /* Define to 1 if you have the <net/if_dl.h> header file. */
 #undef HAVE_NET_IF_DL_H
@@ -1023,6 +1029,9 @@
 
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
+
+/* Enable wide data structures everywhere */
+#undef _PSTAT64
 
 /* SUSv3 */
 #undef _XOPEN_SOURCE

@@ -107,15 +107,16 @@ check_PROGRAMS = arg_split_test$(EXEEXT) assoc_test$(EXEEXT) \
 	cf_key_functions_test$(EXEEXT) \
 	connection_management_test$(EXEEXT) expand_test$(EXEEXT) \
 	string_expressions_test$(EXEEXT) var_expressions_test$(EXEEXT) \
-	process_terminate_unix_test$(EXEEXT) exec-config-test$(EXEEXT) \
-	generic_agent_test$(EXEEXT) syntax_test$(EXEEXT) \
-	sysinfo_test$(EXEEXT) ipaddress_test$(EXEEXT) \
-	hashes_test$(EXEEXT) rb-tree-test$(EXEEXT) \
-	variable_test$(EXEEXT) protocol_test$(EXEEXT) \
-	mon_cpu_test$(EXEEXT) mon_load_test$(EXEEXT) \
-	mon_processes_test$(EXEEXT) mustache_test$(EXEEXT) \
-	class_test$(EXEEXT) version_test$(EXEEXT) hash_test$(EXEEXT) \
-	key_test$(EXEEXT) cf_upgrade_test$(EXEEXT) queue_test$(EXEEXT) \
+	process_terminate_unix_test$(EXEEXT) process_test$(EXEEXT) \
+	exec-config-test$(EXEEXT) generic_agent_test$(EXEEXT) \
+	syntax_test$(EXEEXT) sysinfo_test$(EXEEXT) \
+	ipaddress_test$(EXEEXT) hashes_test$(EXEEXT) \
+	rb-tree-test$(EXEEXT) variable_test$(EXEEXT) \
+	protocol_test$(EXEEXT) mon_cpu_test$(EXEEXT) \
+	mon_load_test$(EXEEXT) mon_processes_test$(EXEEXT) \
+	mustache_test$(EXEEXT) class_test$(EXEEXT) \
+	version_test$(EXEEXT) hash_test$(EXEEXT) key_test$(EXEEXT) \
+	cf_upgrade_test$(EXEEXT) queue_test$(EXEEXT) \
 	matching_test$(EXEEXT) ring_buffer_test$(EXEEXT) \
 	strlist_test$(EXEEXT) addr_lib_test$(EXEEXT) \
 	libcompat_test$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
@@ -125,6 +126,9 @@ check_PROGRAMS = arg_split_test$(EXEEXT) assoc_test$(EXEEXT) \
 @HAVE_AVAHI_CLIENT_TRUE@@HAVE_AVAHI_COMMON_TRUE@    findhub_test \
 @HAVE_AVAHI_CLIENT_TRUE@@HAVE_AVAHI_COMMON_TRUE@    avahi_config_test
 
+@AIX_FALSE@@HPUX_TRUE@XFAIL_TESTS = mon_load_test$(EXEEXT)
+@AIX_TRUE@XFAIL_TESTS = evalfunction_test$(EXEEXT) \
+@AIX_TRUE@	set_domainname_test$(EXEEXT)
 @BUILTIN_EXTENSIONS_FALSE@am__append_3 = enterprise_extension_test
 @BUILTIN_EXTENSIONS_FALSE@am__append_4 = cfengine-enterprise.la
 @LINUX_TRUE@am__append_5 = linux_process_test
@@ -171,7 +175,7 @@ cfengine_enterprise_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(LDFLAGS) -o $@
 @BUILTIN_EXTENSIONS_FALSE@am_cfengine_enterprise_la_rpath =
 libdb_la_DEPENDENCIES = libstr.la ../../libutils/libutils.la
-am__libdb_la_SOURCES_DIST = ../../libpromises/dbm_api.c \
+am__libdb_la_SOURCES_DIST = db_stubs.c ../../libpromises/dbm_api.c \
 	../../libpromises/mutex.c ../../libpromises/dbm_quick.c \
 	../../libpromises/dbm_tokyocab.c ../../libpromises/dbm_lmdb.c \
 	../../libpromises/dbm_migration.c \
@@ -180,10 +184,10 @@ am__libdb_la_SOURCES_DIST = ../../libpromises/dbm_api.c \
 	../../libutils/logging.c ../../libutils/atexit.c \
 	../../libpromises/cf3globals.c
 @HPUX_TRUE@am__objects_1 = libdb_la-cf3globals.lo
-am_libdb_la_OBJECTS = libdb_la-dbm_api.lo libdb_la-mutex.lo \
-	libdb_la-dbm_quick.lo libdb_la-dbm_tokyocab.lo \
-	libdb_la-dbm_lmdb.lo libdb_la-dbm_migration.lo \
-	libdb_la-dbm_migration_lastseen.lo \
+am_libdb_la_OBJECTS = libdb_la-db_stubs.lo libdb_la-dbm_api.lo \
+	libdb_la-mutex.lo libdb_la-dbm_quick.lo \
+	libdb_la-dbm_tokyocab.lo libdb_la-dbm_lmdb.lo \
+	libdb_la-dbm_migration.lo libdb_la-dbm_migration_lastseen.lo \
 	libdb_la-dbm_migration_bundles.lo libdb_la-logging.lo \
 	libdb_la-atexit.lo $(am__objects_1)
 libdb_la_OBJECTS = $(am_libdb_la_OBJECTS)
@@ -543,6 +547,10 @@ process_terminate_unix_test_OBJECTS =  \
 	$(am_process_terminate_unix_test_OBJECTS)
 process_terminate_unix_test_DEPENDENCIES = libtest.la \
 	../../libutils/libutils.la
+process_test_SOURCES = process_test.c
+process_test_OBJECTS = process_test.$(OBJEXT)
+process_test_DEPENDENCIES = libtest.la \
+	../../libpromises/libpromises.la
 am_protocol_test_OBJECTS = protocol_test.$(OBJEXT) \
 	server_common.$(OBJEXT) server_tls.$(OBJEXT) server.$(OBJEXT) \
 	cf-serverd-enterprise-stubs.$(OBJEXT) \
@@ -729,8 +737,8 @@ SOURCES = $(cfengine_enterprise_la_SOURCES) $(libdb_la_SOURCES) \
 	mustache_test.c $(package_versions_compare_test_SOURCES) \
 	parsemode_test.c parser_test.c persistent_lock_test.c \
 	policy_test.c $(process_terminate_unix_test_SOURCES) \
-	$(protocol_test_SOURCES) $(queue_test_SOURCES) rb-tree-test.c \
-	$(refcount_test_SOURCES) $(regex_test_SOURCES) \
+	process_test.c $(protocol_test_SOURCES) $(queue_test_SOURCES) \
+	rb-tree-test.c $(refcount_test_SOURCES) $(regex_test_SOURCES) \
 	ring_buffer_test.c $(rlist_test_SOURCES) scope_test.c \
 	sequence_test.c $(set_domainname_test_SOURCES) set_test.c \
 	$(solaris_process_test_SOURCES) $(sort_test_SOURCES) \
@@ -770,7 +778,7 @@ DIST_SOURCES = $(am__cfengine_enterprise_la_SOURCES_DIST) \
 	$(mon_processes_test_SOURCES) mustache_test.c \
 	$(package_versions_compare_test_SOURCES) parsemode_test.c \
 	parser_test.c persistent_lock_test.c policy_test.c \
-	$(process_terminate_unix_test_SOURCES) \
+	$(process_terminate_unix_test_SOURCES) process_test.c \
 	$(protocol_test_SOURCES) $(queue_test_SOURCES) rb-tree-test.c \
 	$(refcount_test_SOURCES) $(regex_test_SOURCES) \
 	ring_buffer_test.c $(rlist_test_SOURCES) scope_test.c \
@@ -1222,6 +1230,29 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 workdir = @workdir@
 
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 # Just recursively include in dist tarball all data we need for unit tests
 EXTRA_DIST = data dynamic_dependency_test.sh
 AM_CPPFLAGS = $(CORE_CPPFLAGS) \
@@ -1256,7 +1287,7 @@ libstr_la_SOURCES = ../../libutils/string_lib.c ../../libutils/regex.c \
 	../../libutils/sequence.c
 
 libstr_la_LIBADD = libtest.la
-libdb_la_SOURCES = ../../libpromises/dbm_api.c \
+libdb_la_SOURCES = db_stubs.c ../../libpromises/dbm_api.c \
 	../../libpromises/mutex.c ../../libpromises/dbm_quick.c \
 	../../libpromises/dbm_tokyocab.c ../../libpromises/dbm_lmdb.c \
 	../../libpromises/dbm_migration.c \
@@ -1372,6 +1403,7 @@ rlist_test_SOURCES = rlist_test.c \
        ../../libpromises/rlist.c ../../libutils/logging.c
 
 rlist_test_LDADD = libtest.la libstr.la ../../libpromises/libpromises.la
+process_test_LDADD = libtest.la ../../libpromises/libpromises.la
 @LINUX_TRUE@linux_process_test_SOURCES = linux_process_test.c \
 @LINUX_TRUE@	../../libpromises/process_unix.c \
 @LINUX_TRUE@	../../libpromises/process_linux.c \
@@ -1741,6 +1773,10 @@ process_terminate_unix_test$(EXEEXT): $(process_terminate_unix_test_OBJECTS) $(p
 	@rm -f process_terminate_unix_test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(process_terminate_unix_test_OBJECTS) $(process_terminate_unix_test_LDADD) $(LIBS)
 
+process_test$(EXEEXT): $(process_test_OBJECTS) $(process_test_DEPENDENCIES) $(EXTRA_process_test_DEPENDENCIES) 
+	@rm -f process_test$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(process_test_OBJECTS) $(process_test_LDADD) $(LIBS)
+
 protocol_test$(EXEEXT): $(protocol_test_OBJECTS) $(protocol_test_DEPENDENCIES) $(EXTRA_protocol_test_DEPENDENCIES) 
 	@rm -f protocol_test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(protocol_test_OBJECTS) $(protocol_test_LDADD) $(LIBS)
@@ -1929,6 +1965,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcompat_test-libcompat_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-atexit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-cf3globals.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-db_stubs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-dbm_api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-dbm_lmdb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdb_la-dbm_migration.Plo@am__quote@
@@ -1966,6 +2003,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_solaris.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_terminate_unix_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_unix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protocol_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/queue_test.Po@am__quote@
@@ -2034,6 +2072,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+libdb_la-db_stubs.lo: db_stubs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdb_la_CFLAGS) $(CFLAGS) -MT libdb_la-db_stubs.lo -MD -MP -MF $(DEPDIR)/libdb_la-db_stubs.Tpo -c -o libdb_la-db_stubs.lo `test -f 'db_stubs.c' || echo '$(srcdir)/'`db_stubs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libdb_la-db_stubs.Tpo $(DEPDIR)/libdb_la-db_stubs.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='db_stubs.c' object='libdb_la-db_stubs.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdb_la_CFLAGS) $(CFLAGS) -c -o libdb_la-db_stubs.lo `test -f 'db_stubs.c' || echo '$(srcdir)/'`db_stubs.c
 
 libdb_la-dbm_api.lo: ../../libpromises/dbm_api.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libdb_la_CFLAGS) $(CFLAGS) -MT libdb_la-dbm_api.lo -MD -MP -MF $(DEPDIR)/libdb_la-dbm_api.Tpo -c -o libdb_la-dbm_api.lo `test -f '../../libpromises/dbm_api.c' || echo '$(srcdir)/'`../../libpromises/dbm_api.c
@@ -3553,6 +3598,13 @@ var_expressions_test.log: var_expressions_test$(EXEEXT)
 process_terminate_unix_test.log: process_terminate_unix_test$(EXEEXT)
 	@p='process_terminate_unix_test$(EXEEXT)'; \
 	b='process_terminate_unix_test'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+process_test.log: process_test$(EXEEXT)
+	@p='process_test$(EXEEXT)'; \
+	b='process_test'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

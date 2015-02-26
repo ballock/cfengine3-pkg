@@ -80,16 +80,16 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = libcompat
-DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am strcasestr.c \
-	gmtime_r.c nanosleep.c pthread_sigmask.c memrchr.c unsetenv.c \
-	strsep.c memdup.c strstr.c strrstr.c openat.c log2.c \
-	strcasecmp.c fstatat.c strncasecmp.c mkdtemp.c strerror.c \
-	rpl_ctime.c memmem.c fchownat.c drand48.c strlcat.c \
-	setlinebuf.c clock_gettime.c inet_ntop.c strndup.c snprintf.c \
-	strsignal.c getaddrinfo.c strnlen.c \
-	pthread_attr_setstacksize.c inet_pton.c round.c srand48.c \
-	strlcpy.c dirfd.c localtime_r.c getloadavg.c getline.c \
-	strdup.c $(top_srcdir)/depcomp
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
+	getaddrinfo.c strndup.c strlcpy.c getline.c unsetenv.c \
+	pthread_attr_setstacksize.c strstr.c nanosleep.c memmem.c \
+	memrchr.c strdup.c srand48.c drand48.c memdup.c \
+	pthread_sigmask.c setlinebuf.c fchownat.c dirfd.c strnlen.c \
+	strsep.c strerror.c fstatat.c strcasecmp.c getloadavg.c \
+	rpl_ctime.c inet_pton.c strrstr.c openat.c log2.c snprintf.c \
+	mkdtemp.c strcasestr.c gmtime_r.c strncasecmp.c round.c \
+	inet_ntop.c localtime_r.c strlcat.c strsignal.c \
+	clock_gettime.c $(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
 	$(top_srcdir)/m4/adl_recursive_eval.m4 \
@@ -382,6 +382,30 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 workdir = @workdir@
+
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 noinst_LTLIBRARIES = libcompat.la
 AM_CPPFLAGS = -I$(top_srcdir)/libutils				# platform.h
 libcompat_la_LIBADD = $(LTLIBOBJS)

@@ -54,11 +54,7 @@ extern int yydebug;
     BODY = 264,
     ASSIGN = 265,
     ARROW = 266,
-    NAKEDVAR = 267,
-    OP = 268,
-    CP = 269,
-    OB = 270,
-    CB = 271
+    NAKEDVAR = 267
   };
 #endif
 /* Tokens.  */
@@ -72,10 +68,6 @@ extern int yydebug;
 #define ASSIGN 265
 #define ARROW 266
 #define NAKEDVAR 267
-#define OP 268
-#define CP 269
-#define OB 270
-#define CB 271
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

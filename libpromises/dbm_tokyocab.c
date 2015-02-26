@@ -161,6 +161,10 @@ static bool OpenTokyoDatabase(const char *filename, TCHDB **hdb)
     return true;
 }
 
+void DBPrivSetMaximumConcurrentTransactions(ARG_UNUSED int max_txn)
+{
+}
+
 DBPriv *DBPrivOpenDB(const char *dbpath, ARG_UNUSED dbid id)
 {
     DBPriv *db = xcalloc(1, sizeof(DBPriv));
@@ -219,7 +223,7 @@ void DBPrivCommit(ARG_UNUSED DBPriv *db)
 
 bool DBPrivHasKey(DBPriv *db, const void *key, int key_size)
 {
-    // FIXME: distinguish between "entry not found" and "error occured"
+    // FIXME: distinguish between "entry not found" and "error occurred"
 
     return tchdbvsiz(db->hdb, key, key_size) != -1;
 }
