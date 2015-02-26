@@ -1,3 +1,26 @@
+dnl
+dnl  Copyright (C) CFEngine AS
+dnl
+dnl  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+dnl
+dnl  This program is free software; you can redistribute it and/or modify it
+dnl  under the terms of the GNU General Public License as published by the
+dnl  Free Software Foundation; version 3.
+dnl
+dnl  This program is distributed in the hope that it will be useful,
+dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl  GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+dnl
+dnl To the extent this program is licensed as part of the Enterprise
+dnl versions of CFEngine, the applicable Commercial Open Source License
+dnl (COSL) may apply to this file if you as a licensee so wish it. See
+dnl included file COSL.txt.
+dnl
 dnl ##########################################################################
 dnl #
 dnl # Build CFEngine
@@ -25,7 +48,7 @@ dnl The version in the next line is the only one to set
 dnl
 
 _AM_SET_OPTION([tar-ustar])
-AM_INIT_AUTOMAKE(cfengine, 3.6.2)
+AM_INIT_AUTOMAKE(cfengine, 3.6.4)
 AM_MAINTAINER_MODE([enable])
 
 AC_DEFINE(BUILD_YEAR, esyscmd([date +%Y | tr -d '\n']), "Software build year")
@@ -528,6 +551,11 @@ AC_CHECK_HEADERS(sys/mount.h, [], [], [AC_INCLUDES_DEFAULT
 # Required on BSD to get struct sockaddr_dl (for retrieving MAC addresses from getifaddrs())
 AC_CHECK_HEADERS(net/if_dl.h)
 
+# Required on Solaris to get struct arpreq (for retrieving MAC addresses)
+AC_CHECK_HEADERS(net/if_arp.h, , , [AC_INCLUDES_DEFAULT
+#include <sys/socket.h>
+])
+
 AC_CHECK_HEADERS(utime.h)
 AC_CHECK_HEADERS(time.h)
 AC_CHECK_HEADERS(sys/time.h)
@@ -697,6 +725,11 @@ AC_CHECK_DECLS(isfinite, [], [], [[#include <math.h>]])
 AC_CHECK_FUNCS(getpwent setpwent endpwent)
 
 AC_CHECK_FUNCS(fgetspent lckpwdf ulckpwdf)
+AC_CHECK_LIB([sec], [fgetspent], [
+    AC_DEFINE([HAVE_LIBSEC], 1, [Define if -lsec is available])
+    AC_DEFINE([HAVE_FGETSPENT], 1, [Define if fgetspent is available])
+    LIBS="-lsec $LIBS"
+])
 
 AC_CHECK_DECLS(getloadavg)
 AC_FUNC_GETLOADAVG
@@ -1095,7 +1128,9 @@ case "$target_os" in
         AC_DEFINE(_XOPEN_SOURCE, 600, [SUSv3])
         AC_DEFINE(__EXTENSIONS__, 1, [Extended UNIX 98 interfaces])
         ;;
-   hpux*|hp-ux*) 
+   hpux*|hp-ux*)
+        dnl pstat* functions may fail with EOVERFLOW without this.
+        AC_DEFINE(_PSTAT64, 1, [Enable wide data structures everywhere])
         ;;
    aix*)
         CPPFLAGS="$CPPFLAGS -w"

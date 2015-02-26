@@ -68,7 +68,6 @@ typedef enum
 
     JSON_PARSE_ERROR_STRING_NO_DOUBLEQUOTE_START,
     JSON_PARSE_ERROR_STRING_NO_DOUBLEQUOTE_END,
-    JSON_PARSE_ERROR_STRING_UNSUPPORTED_ESCAPE,
 
     JSON_PARSE_ERROR_NUMBER_EXPONENT_NEGATIVE,
     JSON_PARSE_ERROR_NUMBER_EXPONENT_POSITIVE,
@@ -82,6 +81,7 @@ typedef enum
 
     JSON_PARSE_ERROR_ARRAY_START,
     JSON_PARSE_ERROR_ARRAY_END,
+    JSON_PARSE_ERROR_ARRAY_COMMA,
 
     JSON_PARSE_ERROR_OBJECT_BAD_SYMBOL,
     JSON_PARSE_ERROR_OBJECT_START,
@@ -94,6 +94,7 @@ typedef enum
 
     JSON_PARSE_ERROR_INVALID_START,
     JSON_PARSE_ERROR_NO_DATA,
+    JSON_PARSE_ERROR_TRUNCATED,
 
     JSON_PARSE_ERROR_MAX
 } JsonParseError;
@@ -241,7 +242,7 @@ void JsonObjectAppendElement(JsonElement *object, const char *key, JsonElement *
   @brief Get the value of a field in an object, as a string.
   @param object [in] The JSON object parent.
   @param key [in] the key of the field.
-  @returns A pointer to the string value, or NULL if non-existant.
+  @returns A pointer to the string value, or NULL if non-existent.
   */
 const char *JsonObjectGetAsString(const JsonElement *object, const char *key);
 
@@ -249,7 +250,7 @@ const char *JsonObjectGetAsString(const JsonElement *object, const char *key);
   @brief Get the value of a field in an object, as an object.
   @param object [in] The JSON object parent.
   @param key [in] the key of the field.
-  @returns A pointer to the object value, or NULL if non-existant.
+  @returns A pointer to the object value, or NULL if non-existent.
   */
 JsonElement *JsonObjectGetAsObject(JsonElement *object, const char *key);
 
@@ -257,7 +258,7 @@ JsonElement *JsonObjectGetAsObject(JsonElement *object, const char *key);
   @brief Get the value of a field in an object, as an array.
   @param object [in] The JSON object parent.
   @param key [in] the key of the field.
-  @returns A pointer to the array value, or NULL if non-existant.
+  @returns A pointer to the array value, or NULL if non-existent.
   */
 JsonElement *JsonObjectGetAsArray(JsonElement *object, const char *key);
 
@@ -328,7 +329,7 @@ void JsonContainerReverse(JsonElement *array);
   @brief Get a string value from an array
   @param array [in] The JSON array parent
   @param index [in] Position of the value to get
-  @returns A pointer to the string value, or NULL if non-existant.
+  @returns A pointer to the string value, or NULL if non-existent.
   */
 const char *JsonArrayGetAsString(JsonElement *array, size_t index);
 
@@ -336,7 +337,7 @@ const char *JsonArrayGetAsString(JsonElement *array, size_t index);
   @brief Get an object value from an array
   @param array [in] The JSON array parent
   @param index [in] Position of the value to get
-  @returns A pointer to the object value, or NULL if non-existant.
+  @returns A pointer to the object value, or NULL if non-existent.
   */
 JsonElement *JsonArrayGetAsObject(JsonElement *array, size_t index);
 

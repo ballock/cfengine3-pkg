@@ -196,6 +196,11 @@ void MonNetworkGatherData(double *cf_this)
 
     sscanf(VNETSTAT[VSYSTEMHARDCLASS], "%s", comm);
 
+    if (!FileCanOpen(comm, "r"))
+    {
+        return;
+    }
+
     strcat(comm, " -an");
 
     if ((pp = cf_popen(comm, "r", true)) == NULL)

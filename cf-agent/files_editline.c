@@ -266,7 +266,8 @@ Bundle *MakeTemporaryBundleFromTemplate(EvalContext *ctx, Policy *policy, Attrib
                     sp += len;
                 }
 
-                *(sp-1) = '\0'; // StripTrailingNewline(promiser) and terminate
+                int nl = StripTrailingNewline(promiser, size);
+                assert(nl != -1);
 
                 np = PromiseTypeAppendPromise(tp, promiser, (Rval) { NULL, RVAL_TYPE_NOPROMISEE }, context);
                 np->offset.line = lineno;
@@ -386,6 +387,14 @@ static PromiseResult VerifyLineDeletions(EvalContext *ctx, const Promise *pp, Ed
         }
         result = PromiseResultUpdate(result, PROMISE_RESULT_INTERRUPTED);
         return result;
+    }
+    if ((!end_ptr || end_ptr == CF_UNDEFINED_ITEM) && a.region.select_end)
+    {
+        cfPS(ctx, LOG_LEVEL_VERBOSE, PROMISE_RESULT_INTERRUPTED, pp, a,
+            "The promised end pattern '%s' was not found when selecting region to delete in '%s'",
+             a.region.select_end, edcontext->filename);
+        result = PromiseResultUpdate(result, PROMISE_RESULT_INTERRUPTED);
+        return false;
     }
 
     snprintf(lockname, CF_BUFSIZE - 1, "deleteline-%s-%s", pp->promiser, edcontext->filename);

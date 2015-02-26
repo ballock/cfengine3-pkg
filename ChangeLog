@@ -1,3 +1,77 @@
+3.6.4:
+        Features:
+        - Introduced users promises support on HP-UX platform.
+        - Introduced process promises support on HP-UX platform.
+
+        Bug fixes:
+        - Fixed bug on FreeBSD which sometimes led to the wrong process being
+          killed (Redmine #2330)
+        - Fixed package version comparison sometimes failing with rpm package
+          manager (Redmine #6807)
+        - Fixed a bug in users promises which would sometimes set the wrong
+          password hash if the user would also be unlocked at the same time.
+        - Fixed a bug on AIX which would occationally kill the wrong process.
+        - Improved error message for functions that require an absolute path.
+          (Redmine #6877)
+        - Fixed some spelling errors in examples.
+        - Fixed error in out-of-tree builds when building cf-upgrade.
+        - Fixed a bug which would make cf-agent exit with an error if it was
+          built with a custom log directory, and that directory did not exist.
+        - Fixed ordering of evaluating promises when depends_on is used.
+          (Redmine #6484, Redmine #5462)
+        - Skip non-empty directories silently when recursively deleting.
+          (Redmine #6331)
+        - Fix memory exhaustion with list larger than 4994 items.
+          (Redmine # 6672)
+        - Fix cf-execd segfault on IP address detection (Redmine #6905).
+        - Fix hard class detection of RHEL6 ComputeNode (Redmine #3148).
+
+3.6.3
+        New features:
+        - support for HP-UX 11.23 and later
+        - experimental support for Red Hat Enterprise Linux 7
+
+        Bug fixes:
+        - fix getindices on multi-dimensional arrays (Redmine #6779)
+        - fix mustache template method to run in dryrun mode (Redmine #6739)
+        - set mailto and mailfrom settings for execd in def.cf (Redmine #6702)
+        - fix conflation of multi-index entries in arrays (Redmine #6674)
+        - fix promise locking when transferring using update.cf (Redmine #6623)
+        - update JSON parser to return an error on truncation (Redmine #6608)
+        - fix sys.hardware_addresses not expanded (Redmine #6603)
+        - fix opening database txn /var/cfengine/cf_lastseen.lmdb:
+          MDB_READERS_FULL when running cf-keys --show-hosts (Redmine #6602)
+        - fix segfault (Null pointer dereference) when select_end in
+          delete_lines never matches (Redmine #6589)
+        - fix max_file_size => "0" not disabling or allowing any size
+          (Redmine #6588)
+        - fix ifvarclass, with iteration over list, failing when deleting
+          files with time condition (Redmine #6577)
+        - fix classes defined with "or" constraint are never set if any value
+          doesn't evaluate to a scalar (Redmine #6569)
+        - update "mailfrom" default in default policy (Redmine #6567)
+        - fix logrotate ambiguity of filename (Redmine #6563)
+        - fix parsing JSON files (Redmine #6549)
+        - reduce write count activity to /var partition (Redmine #6523)
+        - fix files delete attribute incorrectly triggering promise_kept
+          (Redmine #6509)
+        - update services bundle output related to chkconfig when run in
+          inform mode. (Redmine #6492)
+        - fix Solaris serverd tests (Redmine #6406)
+        - fix broken bechaviour of merging arrays with readstringarray
+          (Redmine #6369)
+        - fix ifelapsed bug with bundle nesting (Redmine #6334)
+        - fix handling cf_null in bundlesequence (Redmine #6119)
+        - fix maparray reading whole input array when using subarray
+          (Redmine #6033)
+        - fix directories being randomly changed to files (Redmine #6027)
+        - update defaults promise type to work with classes (Redmine #5748)
+        - systemd integration in services promises (Redmine #5415)
+        - fix touch attribute ignoring action = warn_only (Redmine #3172)
+        - fix 4KB string limit in functions readfile, string_downcase,
+          string_head, string_reverse, string_length, string_tail,
+          string_upcase (Redmine #2912)
+
 3.6.2
         Bug fixes:
         - don't regenerate software_packages.csv every time (Redmine #6441)
@@ -156,7 +230,7 @@
               (e.g. "cfengine.com") or subdomains (starting with dot,
               e.g. ".cfengine.com") for "admit/deny"_hostnames. Same rules
               apply to 'deny_*' attributes.
-            - These new constaints and the paths in access_rules, can contain
+            - These new constraints and the paths in access_rules, can contain
               special variables "$(connection.ip)", "$(connection.hostname)",
               "$(connection.key)", which are expanded dynamically for every
               received connection.
@@ -601,7 +675,7 @@
 	  ** WARNING: When upgrading, make sure that any existing use
 		      of depends_on does not make some promises being
 		      unintentionally ignored. This can happen if you are
-		      currently refering to non-existant or never-run handles
+		      currently referring to non-existent or never-run handles
 		      in depends_on attributes.
 
 	- methods return values, initial implementation
@@ -734,7 +808,7 @@
 
 	- Do not lose hard classes in cf-serverd during policy reload
 	  (Mantis #1218).
-	- Implement recieve network timeout in cf-serverd. Prevents
+	- Implement receive network timeout in cf-serverd. Prevents
 	  overloading cf-serverd with stale connections.
 
 3.3.8   (Bugfix and Stability release)
@@ -1012,7 +1086,7 @@
 	Added detection of network interfaces which belong to BSD jails.
 
 	Improve robustness of multi-threaded code, in particular fix
-	problems with spurious acces denials in server and losing of
+	problems with spurious access denials in server and losing of
 	authentication rules after policy reload.
 
 	cf-promises accepts option -b matching cf-agent, which causes it
@@ -1075,7 +1149,7 @@
 3.1.2   (Scalability/efficiency release)
 
 	Big efficiency improvements by caching output from
-	cf-promises. Can also be used for much more efficent policy
+	cf-promises. Can also be used for much more efficient policy
 	deployment (only pull if changed).
 
 	Caching state of ps command for greater efficiency. Reloaded for each bundle.
@@ -1409,7 +1483,7 @@
 	Reporting rationalized in cf-promises with -r only to avoid
 	leaving output files everywhere.
 
-	Hooks added for upcoming commerical additions to cfengine.
+	Hooks added for upcoming commercial additions to cfengine.
 
 	Added classify() and hostinnetgroup() functions
 	Added additional change management options for change detection

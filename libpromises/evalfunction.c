@@ -116,7 +116,7 @@ int FnNumArgs(const FnCallType *call_type)
   */
 
 /*
- * Return succesful FnCallResult with copy of str retained.
+ * Return successful FnCallResult with copy of str retained.
  */
 static FnCallResult FnReturn(const char *str)
 {
@@ -124,7 +124,7 @@ static FnCallResult FnReturn(const char *str)
 }
 
 /*
- * Return succesful FnCallResult with str as is.
+ * Return successful FnCallResult with str as is.
  */
 static FnCallResult FnReturnNoCopy(char *str)
 {
@@ -224,7 +224,7 @@ static JsonElement* VarRefValueToJson(EvalContext *ctx, const FnCall *fp, const 
 
         default:
             {
-                VariableTableIterator *iter = EvalContextVariableTableIteratorNew(ctx, ref->ns, ref->scope, ref->lval);
+                VariableTableIterator *iter = EvalContextVariableTableFromRefIteratorNew(ctx, ref);
                 convert = JsonObjectCreate(10);
                 Variable *var;
                 while ((var = VariableTableIteratorNext(iter)))
@@ -1454,13 +1454,12 @@ static FnCallResult FnCallCanonify(ARG_UNUSED EvalContext *ctx, ARG_UNUSED const
 
 static FnCallResult FnCallTextXform(ARG_UNUSED EvalContext *ctx, ARG_UNUSED const Policy *policy, const FnCall *fp, const Rlist *finalargs)
 {
-    char buf[CF_BUFSIZE];
     char *string = RlistScalarValue(finalargs);
-    int len = 0;
-
-    memset(buf, 0, sizeof(buf));
-    strlcpy(buf, string, sizeof(buf));
-    len = strlen(buf);
+    size_t len = strlen(string);
+    /* In case of string_length(), buf needs enough space to hold a number. */
+    size_t bufsiz = MAX(len + 1, PRINTSIZE(len));
+    char *buf = xcalloc(bufsiz, sizeof(char));
+    memcpy(buf, string, len + 1);
 
     if (!strcmp(fp->name, "string_downcase"))
     {
@@ -1490,12 +1489,18 @@ static FnCallResult FnCallTextXform(ARG_UNUSED EvalContext *ctx, ARG_UNUSED cons
     }
     else if (!strcmp(fp->name, "string_length"))
     {
-        xsnprintf(buf, sizeof(buf), "%d", len);
+        xsnprintf(buf, bufsiz, "%d", len);
     }
     else if (!strcmp(fp->name, "string_head"))
     {
         const long max = IntFromString(RlistScalarValue(finalargs->next));
-        if (max < sizeof(buf))
+        if (max < 0)
+        {
+            Log(LOG_LEVEL_ERR, "string_head called with negative value %ld", max);
+            free(buf);
+            return FnFailure();
+        }
+        else if (max < bufsiz)
         {
             buf[max] = '\0';
         }
@@ -1503,18 +1508,25 @@ static FnCallResult FnCallTextXform(ARG_UNUSED EvalContext *ctx, ARG_UNUSED cons
     else if (!strcmp(fp->name, "string_tail"))
     {
         const long max = IntFromString(RlistScalarValue(finalargs->next));
-        if (max < len)
+        if (max < 0)
         {
-            strncpy(buf, string + len - max, sizeof(buf) - 1);
+            Log(LOG_LEVEL_ERR, "string_tail called with negative value %ld", max);
+            free(buf);
+            return FnFailure();
+        }
+        else if (max < len)
+        {
+            memcpy(buf, string + len - max, max + 1);
         }
     }
     else
     {
         Log(LOG_LEVEL_ERR, "text xform with unknown call function %s, aborting", fp->name);
+        free(buf);
         return FnFailure();
     }
 
-    return FnReturn(buf);
+    return FnReturnNoCopy(buf);
 }
 
 /*********************************************************************/
@@ -1971,7 +1983,8 @@ static FnCallResult FnCallGetIndices(EvalContext *ctx, ARG_UNUSED const Policy *
     }
     else
     {
-        VariableTableIterator *iter = EvalContextVariableTableIteratorNew(ctx, ref->ns, ref->scope, ref->lval);
+        VariableTableIterator *iter = 
+                EvalContextVariableTableFromRefIteratorNew(ctx, ref);
         const Variable *var = NULL;
         while ((var = VariableTableIteratorNext(iter)))
         {
@@ -2071,7 +2084,7 @@ static FnCallResult FnCallGetValues(EvalContext *ctx, ARG_UNUSED const Policy *p
     }
     else
     {
-        VariableTableIterator *iter = EvalContextVariableTableIteratorNew(ctx, ref->ns, ref->scope, ref->lval);
+        VariableTableIterator *iter = EvalContextVariableTableFromRefIteratorNew(ctx, ref);
         Variable *var = NULL;
         while ((var = VariableTableIteratorNext(iter)))
         {
@@ -2504,7 +2517,7 @@ static FnCallResult FnCallMapArray(EvalContext *ctx, ARG_UNUSED const Policy *po
             VarRefQualify(ref, caller_bundle->ns, caller_bundle->name);
         }
 
-        iter = EvalContextVariableTableIteratorNew(ctx, ref->ns, ref->scope, ref->lval);
+        iter = EvalContextVariableTableFromRefIteratorNew(ctx, ref);
         selected_index = ref->num_indices;
         VarRefDestroy(ref);
     }
@@ -5426,17 +5439,17 @@ static FnCallResult FnCallReadFile(ARG_UNUSED EvalContext *ctx, ARG_UNUSED const
 
     char *filename = RlistScalarValue(finalargs);
     char *requested_max = RlistScalarValue(finalargs->next);
-    int maxsize = IntFromString(requested_max);
+    long maxsize = IntFromString(requested_max);
 
-    if (maxsize > CF_BUFSIZE)
+    if (maxsize == CF_INFINITY)                      /* "inf" in the policy */
     {
-        Log(LOG_LEVEL_INFO, "%s: requested max size %s is more than the internal limit " TOSTRING(CF_BUFSIZE), fp->name, requested_max);
-        maxsize = CF_BUFSIZE;
+        maxsize = 0;
     }
 
-    if (maxsize == 0)
+    if (maxsize < 0)
     {
-        maxsize = CF_BUFSIZE;
+        Log(LOG_LEVEL_ERR, "%s: requested max size %s is less than 0", fp->name, requested_max);
+        return FnFailure();
     }
 
     // Read once to validate structure of file in itemlist
@@ -6719,7 +6732,7 @@ void ModuleProtocol(EvalContext *ctx, char *command, const char *line, int print
         }
 
         content[0] = '\0';
-        // TODO: the variable name is limited to 256 to accomodate the
+        // TODO: the variable name is limited to 256 to accommodate the
         // context name once it's in the vartable.  Maybe this can be relaxed.
         sscanf(line + 1, "%256[^=]=%4095[^\n]", name, content);
 
@@ -6738,7 +6751,7 @@ void ModuleProtocol(EvalContext *ctx, char *command, const char *line, int print
 
     case '%':
         content[0] = '\0';
-        // TODO: the variable name is limited to 256 to accomodate the
+        // TODO: the variable name is limited to 256 to accommodate the
         // context name once it's in the vartable.  Maybe this can be relaxed.
         sscanf(line + 1, "%256[^=]=", name);
 
@@ -7804,7 +7817,7 @@ const FnCallType CF_FNCALL_TYPES[] =
     FnCallTypeNew("laterthan", CF_DATA_TYPE_CONTEXT, LATERTHAN_ARGS, &FnCallLaterThan, "True if the current time is later than the given date",
                   FNCALL_OPTION_NONE, FNCALL_CATEGORY_FILES, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("ldaparray", CF_DATA_TYPE_CONTEXT, LDAPARRAY_ARGS, &FnCallLDAPArray, "Extract all values from an ldap record",
-                  FNCALL_OPTION_CACHED, FNCALL_CATEGORY_COMM, SYNTAX_STATUS_NORMAL),
+                  FNCALL_OPTION_NONE, FNCALL_CATEGORY_COMM, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("ldaplist", CF_DATA_TYPE_STRING_LIST, LDAPLIST_ARGS, &FnCallLDAPList, "Extract all named values from multiple ldap records",
                   FNCALL_OPTION_CACHED, FNCALL_CATEGORY_COMM, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("ldapvalue", CF_DATA_TYPE_STRING, LDAPVALUE_ARGS, &FnCallLDAPValue, "Extract the first matching named value from ldap",
@@ -7900,7 +7913,7 @@ const FnCallType CF_FNCALL_TYPES[] =
     FnCallTypeNew("reverse", CF_DATA_TYPE_STRING_LIST, REVERSE_ARGS, &FnCallReverse, "Reverse a string list",
                   FNCALL_OPTION_NONE, FNCALL_CATEGORY_DATA, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("selectservers", CF_DATA_TYPE_INT, SELECTSERVERS_ARGS, &FnCallSelectServers, "Select tcp servers which respond correctly to a query and return their number, set array of names",
-                  FNCALL_OPTION_CACHED, FNCALL_CATEGORY_COMM, SYNTAX_STATUS_NORMAL),
+                  FNCALL_OPTION_NONE, FNCALL_CATEGORY_COMM, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("shuffle", CF_DATA_TYPE_STRING_LIST, SHUFFLE_ARGS, &FnCallShuffle, "Shuffle a string list",
                   FNCALL_OPTION_NONE, FNCALL_CATEGORY_DATA, SYNTAX_STATUS_NORMAL),
     FnCallTypeNew("some", CF_DATA_TYPE_CONTEXT, EVERY_SOME_NONE_ARGS, &FnCallEverySomeNone, "True if an element in the named list matches the given regular expression",

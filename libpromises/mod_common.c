@@ -254,8 +254,8 @@ const ConstraintSyntax CFG_CONTROLBODY[COMMON_CONTROL_MAX + 1] =
     ConstraintSyntaxNewBool("require_comments", "Warn about promises that do not have comment documentation. Default value: false", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewInt("host_licenses_paid", CF_VALRANGE, "This promise is deprecated since CFEngine version 3.1 and is ignored. Default value: 25", SYNTAX_STATUS_REMOVED),
     ConstraintSyntaxNewContextList("site_classes", "A list of classes that will represent geographical site locations for hosts. These should be defined elsewhere in the configuration in a classes promise.", SYNTAX_STATUS_NORMAL),
-    ConstraintSyntaxNewString("syslog_host", CF_IPRANGE, "The name or address of a host to which syslog messages should be sent directly by UDP. Default value: 514", SYNTAX_STATUS_NORMAL),
-    ConstraintSyntaxNewInt("syslog_port", CF_VALRANGE, "The port number of a UDP syslog service", SYNTAX_STATUS_NORMAL),
+    ConstraintSyntaxNewString("syslog_host", CF_IPRANGE, "The name or address of a host to which syslog messages should be sent directly by UDP. Default value: localhost", SYNTAX_STATUS_NORMAL),
+    ConstraintSyntaxNewInt("syslog_port", CF_VALRANGE, "The port number of a UDP syslog service. Default value: 514", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewBool("fips_mode", "Activate full FIPS mode restrictions. Default value: false", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewBool("cache_system_functions", "Cache the result of system functions. Default value: true", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewOption("protocol_version", "0,undefined,1,classic,2,latest", "CFEngine protocol version to use when connecting to the server. Default: classic", SYNTAX_STATUS_NORMAL),
@@ -384,6 +384,7 @@ const ConstraintSyntax CFH_CONTROLBODY[] =  /* enum cfh_control */
     ConstraintSyntaxNewStringList("exclude_hosts", "", "A list of IP addresses of hosts to exclude from report collection", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewStringList("hub_schedule", "", "The class schedule used by cf-hub for report collation", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewInt("port", "1,65535", "Default port for contacting hub nodes. Default value: 5308", SYNTAX_STATUS_NORMAL),
+    ConstraintSyntaxNewInt("client_history_timeout", "1,65535", "Threshold in hours over which if client did not report, hub will start query for full state of the host and discard all accumulated report history on the client. Default value: 6 hours", SYNTAX_STATUS_NORMAL),
     ConstraintSyntaxNewNull()
 };
 

@@ -89,12 +89,17 @@ target_triplet = @target@
 @AIX_TRUE@@NT_FALSE@am__append_3 = \
 @AIX_TRUE@@NT_FALSE@	process_aix.c
 
-@NT_FALSE@@SOLARIS_TRUE@am__append_4 = \
-@NT_FALSE@@SOLARIS_TRUE@	process_solaris.c \
-@NT_FALSE@@SOLARIS_TRUE@	solaris_ifaddrs.c solaris_ifaddrs.h
+@HPUX_TRUE@@NT_FALSE@am__append_4 = \
+@HPUX_TRUE@@NT_FALSE@	process_hpux.c
 
-@AIX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@am__append_5 = \
-@AIX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@        process_unix_stub.c
+@NT_FALSE@@SOLARIS_TRUE@am__append_5 = \
+@NT_FALSE@@SOLARIS_TRUE@	process_solaris.c
+
+@FREEBSD_TRUE@@NT_FALSE@am__append_6 = \
+@FREEBSD_TRUE@@NT_FALSE@        process_freebsd.c
+
+@AIX_FALSE@@FREEBSD_FALSE@@HPUX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@am__append_7 = \
+@AIX_FALSE@@FREEBSD_FALSE@@HPUX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@        process_unix_stub.c
 
 subdir = libpromises
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am cf3parse.h \
@@ -188,14 +193,15 @@ am__libpromises_la_SOURCES_DIST = cf3parse.y cf3parse.h cf3lex.l \
 	vars.c vars.h variable.c variable.h verify_classes.c \
 	verify_classes.h verify_reports.c verify_vars.c verify_vars.h \
 	cf-windows-functions.h bootstrap.inc process_unix.c \
-	pipes_unix.c process_linux.c process_aix.c process_solaris.c \
-	solaris_ifaddrs.c solaris_ifaddrs.h process_unix_stub.c
+	pipes_unix.c process_linux.c process_aix.c process_hpux.c \
+	process_solaris.c process_freebsd.c process_unix_stub.c
 @NT_FALSE@am__objects_1 = process_unix.lo pipes_unix.lo
 @LINUX_TRUE@@NT_FALSE@am__objects_2 = process_linux.lo
 @AIX_TRUE@@NT_FALSE@am__objects_3 = process_aix.lo
-@NT_FALSE@@SOLARIS_TRUE@am__objects_4 = process_solaris.lo \
-@NT_FALSE@@SOLARIS_TRUE@	solaris_ifaddrs.lo
-@AIX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@am__objects_5 = process_unix_stub.lo
+@HPUX_TRUE@@NT_FALSE@am__objects_4 = process_hpux.lo
+@NT_FALSE@@SOLARIS_TRUE@am__objects_5 = process_solaris.lo
+@FREEBSD_TRUE@@NT_FALSE@am__objects_6 = process_freebsd.lo
+@AIX_FALSE@@FREEBSD_FALSE@@HPUX_FALSE@@LINUX_FALSE@@NT_FALSE@@SOLARIS_FALSE@am__objects_7 = process_unix_stub.lo
 am_libpromises_la_OBJECTS = cf3parse.lo cf3lex.lo acl_tools_posix.lo \
 	actuator.lo addr_lib.lo assoc.lo audit.lo attributes.lo \
 	bootstrap.lo cf3globals.lo chflags.lo class.lo constants.lo \
@@ -220,7 +226,8 @@ am_libpromises_la_OBJECTS = cf3parse.lo cf3lex.lo acl_tools_posix.lo \
 	timeout.lo unix.lo var_expressions.lo vars.lo variable.lo \
 	verify_classes.lo verify_reports.lo verify_vars.lo \
 	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4) $(am__objects_5)
+	$(am__objects_4) $(am__objects_5) $(am__objects_6) \
+	$(am__objects_7)
 libpromises_la_OBJECTS = $(am_libpromises_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -516,6 +523,30 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 workdir = @workdir@
+
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 @BUILTIN_EXTENSIONS_FALSE@projlib_LTLIBRARIES = libpromises.la
 @BUILTIN_EXTENSIONS_FALSE@AM_LDFLAGS = -version-info 3:6:0 \
 @BUILTIN_EXTENSIONS_FALSE@	-no-undefined $(LMDB_LDFLAGS) \
@@ -585,7 +616,7 @@ libpromises_la_SOURCES = cf3parse.y cf3parse.h cf3lex.l acl_tools.h \
 	verify_classes.h verify_reports.c verify_vars.c verify_vars.h \
 	cf-windows-functions.h bootstrap.inc $(am__append_1) \
 	$(am__append_2) $(am__append_3) $(am__append_4) \
-	$(am__append_5)
+	$(am__append_5) $(am__append_6) $(am__append_7)
 BUILT_SOURCES = cf3lex.c cf3parse.h cf3parse.c \
 	enterprise_extension.c \
 	enterprise_extension.h
@@ -765,6 +796,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pipes_unix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_aix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_freebsd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_hpux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_solaris.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_unix.Plo@am__quote@
@@ -775,7 +808,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scope.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shared_lib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signals.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/solaris_ifaddrs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sort.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/storage_tools.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/string_expressions.Plo@am__quote@

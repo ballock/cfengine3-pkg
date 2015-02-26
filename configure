@@ -3224,7 +3224,7 @@ fi
 # Define the identity of the package.
 
  PACKAGE=cfengine
- VERSION=3.6.2
+ VERSION=3.6.4
 
 
 cat >>confdefs.h <<_ACEOF
@@ -3457,7 +3457,7 @@ fi
 
 
 
-$as_echo "#define BUILD_YEAR 2014" >>confdefs.h
+$as_echo "#define BUILD_YEAR 2015" >>confdefs.h
 
 
 
@@ -4560,6 +4560,29 @@ fi
 
 
 
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HP-UX aC" >&5
 $as_echo_n "checking for HP-UX aC... " >&6; }
@@ -14724,6 +14747,23 @@ fi
 done
 
 
+# Required on Solaris to get struct arpreq (for retrieving MAC addresses)
+for ac_header in net/if_arp.h
+do :
+  ac_fn_c_check_header_compile "$LINENO" "net/if_arp.h" "ac_cv_header_net_if_arp_h" "$ac_includes_default
+#include <sys/socket.h>
+
+"
+if test "x$ac_cv_header_net_if_arp_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NET_IF_ARP_H 1
+_ACEOF
+
+fi
+
+done
+
+
 for ac_header in utime.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "utime.h" "ac_cv_header_utime_h" "$ac_includes_default"
@@ -16828,6 +16868,54 @@ _ACEOF
 
 fi
 done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fgetspent in -lsec" >&5
+$as_echo_n "checking for fgetspent in -lsec... " >&6; }
+if ${ac_cv_lib_sec_fgetspent+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsec  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fgetspent ();
+int
+main ()
+{
+return fgetspent ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_sec_fgetspent=yes
+else
+  ac_cv_lib_sec_fgetspent=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_sec_fgetspent" >&5
+$as_echo "$ac_cv_lib_sec_fgetspent" >&6; }
+if test "x$ac_cv_lib_sec_fgetspent" = xyes; then :
+
+
+$as_echo "#define HAVE_LIBSEC 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_FGETSPENT 1" >>confdefs.h
+
+    LIBS="-lsec $LIBS"
+
+fi
 
 
 ac_fn_c_check_decl "$LINENO" "getloadavg" "ac_cv_have_decl_getloadavg" "$ac_includes_default"
@@ -20502,6 +20590,9 @@ $as_echo "#define __EXTENSIONS__ 1" >>confdefs.h
 
         ;;
    hpux*|hp-ux*)
+
+$as_echo "#define _PSTAT64 1" >>confdefs.h
+
         ;;
    aix*)
         CPPFLAGS="$CPPFLAGS -w"
@@ -20582,6 +20673,29 @@ fi
         ;;
 esac
 
+#
+#  Copyright (C) CFEngine AS
+#
+#  This file is part of CFEngine 3 - written and maintained by CFEngine AS.
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; version 3.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# To the extent this program is licensed as part of the Enterprise
+# versions of CFEngine, the applicable Commercial Open Source License
+# (COSL) may apply to this file if you as a licensee so wish it. See
+# included file COSL.txt.
+#
 #
 # OS kernels conditionals. Don't use those unless it is really needed (if code
 # depends on the *kernel* feature, and even then -- some kernel features are

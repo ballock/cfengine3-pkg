@@ -174,11 +174,7 @@ extern int yydebug;
     BODY = 264,
     ASSIGN = 265,
     ARROW = 266,
-    NAKEDVAR = 267,
-    OP = 268,
-    CP = 269,
-    OB = 270,
-    CB = 271
+    NAKEDVAR = 267
   };
 #endif
 /* Tokens.  */
@@ -192,10 +188,6 @@ extern int yydebug;
 #define ASSIGN 265
 #define ARROW 266
 #define NAKEDVAR 267
-#define OP 268
-#define CP 269
-#define OB 270
-#define CB 271
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -213,7 +205,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 217 "cf3parse.c" /* yacc.c:358  */
+#line 209 "cf3parse.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -455,21 +447,21 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  18
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   133
+#define YYLAST   134
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  19
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  63
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  117
+#define YYNRULES  118
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  143
+#define YYNSTATES  145
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   271
+#define YYMAXUTOK   267
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -482,7 +474,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,    17,     2,     2,     2,     2,     2,
+      13,    14,     2,     2,    15,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,    18,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -490,7 +482,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,    17,     2,    16,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -504,26 +496,25 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16
+       5,     6,     7,     8,     9,    10,    11,    12
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    76,    76,    77,    81,    82,    86,    87,    88,    94,
-      96,   100,   116,   129,   136,   142,   143,   152,   166,   173,
-     179,   185,   186,   195,   205,   213,   214,   215,   216,   222,
-     227,   234,   235,   239,   244,   253,   252,   295,   299,   307,
-     308,   312,   313,   314,   325,   329,   372,   373,   377,   378,
-     382,   383,   388,   389,   414,   415,   425,   420,   451,   450,
-     477,   488,   510,   511,   512,   533,   552,   553,   558,   631,
-     651,   659,   658,   710,   711,   715,   716,   720,   721,   728,
-     808,   827,   848,   852,   860,   874,   894,   901,   908,   925,
-     934,   947,   955,   963,   967,   968,   969,   970,   990,   996,
-    1004,  1012,  1019,  1027,  1031,  1035,  1048,  1056,  1055,  1081,
-    1082,  1083,  1084,  1092,  1099,  1108,  1117,  1126
+       0,    75,    75,    76,    80,    81,    85,    86,    87,    93,
+      95,    99,   115,   128,   135,   141,   142,   151,   165,   172,
+     178,   184,   185,   194,   204,   212,   213,   214,   215,   221,
+     226,   233,   234,   238,   243,   252,   251,   294,   298,   306,
+     307,   311,   312,   313,   324,   328,   371,   372,   376,   377,
+     381,   382,   387,   388,   413,   414,   424,   419,   450,   449,
+     476,   487,   509,   510,   511,   532,   551,   552,   557,   630,
+     650,   658,   657,   709,   710,   714,   715,   719,   720,   727,
+     807,   826,   847,   851,   859,   873,   893,   900,   907,   924,
+     933,   946,   954,   962,   963,   964,   969,   970,   971,   993,
+    1005,  1019,  1027,  1034,  1042,  1046,  1050,  1063,  1071,  1070,
+    1096,  1097,  1098,  1099,  1107,  1114,  1123,  1132,  1141
 };
 #endif
 
@@ -534,7 +525,7 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "IDSYNTAX", "BLOCKID", "QSTRING",
   "CLASS", "PROMISE_TYPE", "BUNDLE", "BODY", "ASSIGN", "ARROW", "NAKEDVAR",
-  "OP", "CP", "OB", "CB", "','", "';'", "$accept", "specification",
+  "'('", "')'", "','", "'}'", "'{'", "';'", "$accept", "specification",
   "blocks", "block", "bundle", "body", "bundletype", "bundletype_values",
   "bundleid", "bundleid_values", "bodytype", "bodytype_values", "bodyid",
   "bodyid_values", "typeid", "symbol", "arglist", "arglist_begin",
@@ -557,7 +548,7 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271,    44,    59
+     265,   266,   267,    40,    41,    44,   125,   123,    59
 };
 # endif
 
@@ -566,7 +557,7 @@ static const yytype_uint16 yytoknum[] =
 #define yypact_value_is_default(Yystate) \
   (!!((Yystate) == (-98)))
 
-#define YYTABLE_NINF -111
+#define YYTABLE_NINF -112
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -575,21 +566,21 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      94,   -98,    67,    98,     9,    96,   -98,   -98,   -98,   -98,
-     -98,   105,   -98,   -98,   -98,   106,   -98,   -98,   -98,   -98,
-     -98,   -98,    -3,   -98,   -98,   -98,    -3,   -98,   -98,   -98,
-      45,    36,    45,   -98,   -98,   -98,   -98,     0,   -98,   -98,
-     -98,    24,   -98,   -98,   -98,    68,   109,   -98,    55,   -98,
-     -98,    29,    14,   -98,    58,   -98,   -98,   -98,   -98,   -98,
-      12,   -98,   -98,     5,    47,   -98,   -98,   -98,   -98,   -98,
-     -98,    66,   -98,   -98,    -2,   -98,   -98,     1,   -98,   -98,
-     -98,   -98,   -98,   -98,   -98,    75,   -98,   -98,   -98,   -98,
-       2,    75,   -98,    27,    64,   -98,    72,    50,   -98,   -98,
-      85,   -98,   -98,   -98,   -98,     6,    71,   -98,    47,   -98,
-     -98,    27,   -98,   -98,    72,    65,    10,   -98,   -98,   -98,
-     -98,   110,    75,     2,   -98,   -98,    50,    30,   -98,   -98,
-     -98,   -98,   -98,    27,   -98,    72,   -98,    69,    35,   -98,
-      88,   -98,   -98
+      94,   -98,    66,    97,    17,    96,   -98,   -98,   -98,   -98,
+     -98,    98,   -98,   -98,   -98,   106,   -98,   -98,   -98,   -98,
+     -98,   -98,    25,   -98,   -98,   -98,    25,   -98,   -98,   -98,
+       9,    73,     9,   -98,   -98,   -98,   -98,   102,   -98,   -98,
+     -98,   104,   -98,   -98,   -98,    43,   109,   -98,   105,   -98,
+     -98,    26,    14,   -98,    48,   -98,   -98,   -98,   -98,   -98,
+      62,   -98,   -98,     5,     8,   -98,   -98,   -98,   -98,   -98,
+     -98,    55,   -98,   -98,    28,   -98,   -98,     1,   -98,   -98,
+     -98,   -98,   -98,   -98,   -98,    10,   -98,   -98,   -98,   -98,
+       2,    10,   -98,    38,    44,   -98,    53,    31,   -98,   -98,
+      70,   -98,   -98,   -98,   -98,     6,    60,   -98,     8,   -98,
+     -98,    38,   -98,   -98,    53,   -98,   107,    57,   -98,   -98,
+     -98,   -98,   112,    10,     2,    36,   -98,   -98,    76,   -98,
+     -98,   -98,   -98,   -98,   -98,    38,   -98,    53,   -98,   110,
+      15,   -98,    81,   -98,   -98
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -608,22 +599,22 @@ static const yytype_uint8 yydefact[] =
       74,    78,    77,    83,    82,     0,    49,    52,    53,    84,
        0,     0,    92,    86,    87,    88,    89,     0,    79,    90,
        0,    91,    70,    69,    59,     0,    65,    66,     0,    56,
-     102,    98,   104,    99,   100,     0,     0,   101,   107,   106,
-      64,     0,     0,     0,    93,    97,     0,     0,    67,    68,
-      57,    96,   117,   113,   114,   115,   116,     0,     0,   108,
-       0,   112,   111
+     103,    99,   105,   100,   101,    93,     0,     0,   102,   108,
+     107,    64,     0,     0,     0,     0,    94,    98,     0,    67,
+      68,    57,    95,    97,   118,   114,   115,   116,   117,     0,
+       0,   109,     0,   113,   112
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -98,   -98,   -98,    17,   -98,   -98,   -98,   -98,   -98,   -98,
-     -98,   -98,   -98,   -98,   111,   100,    90,   -98,    76,   -98,
-      73,   -98,   -98,    86,   -98,   -98,    70,   -98,   -98,   -98,
-      49,   -98,   -98,   -98,   -98,   -98,   -98,   -98,     3,   -98,
-     -98,     4,   -98,   -98,   -98,   -98,    61,   -98,   -98,   -98,
-      15,   -98,   -46,   -90,   -98,     7,   -98,   -98,   -97,   -98,
-     -98,   -98,   -16
+     -98,   -98,   -98,    65,   -98,   -98,   -98,   -98,   -98,   -98,
+     -98,   -98,   -98,   -98,    86,    77,    88,   -98,    79,   -98,
+      75,   -98,   -98,    95,   -98,   -98,    74,   -98,   -98,   -98,
+      58,   -98,   -98,   -98,   -98,   -98,   -98,   -98,     4,   -98,
+     -98,    11,   -98,   -98,   -98,   -98,    71,   -98,   -98,   -98,
+      22,   -98,   -46,   -90,   -98,   -98,     7,   -98,   -97,   -98,
+     -98,   -98,    -8
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -632,10 +623,10 @@ static const yytype_int16 yydefgoto[] =
       -1,     4,     5,     6,     7,     8,    11,    12,    22,    23,
       15,    16,    26,    27,    13,    24,    30,    31,    40,    41,
       42,    35,    45,    36,    51,    52,    53,    54,    70,    71,
-      72,    73,    74,    75,   123,    76,    90,    77,   104,   105,
+      72,    73,    74,    75,   124,    76,    90,    77,   104,   105,
      106,   107,   108,    44,    48,    60,    61,    62,    63,    64,
-      85,    91,    65,    98,    99,   115,   116,   100,   101,   119,
-     127,   137,   138
+      85,    91,    65,    98,    99,   116,   117,   100,   101,   120,
+     128,   139,   140
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -643,38 +634,38 @@ static const yytype_int16 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int16 yytable[] =
 {
-     117,   109,    88,   102,   -58,   103,    81,   120,    78,    18,
-      29,   125,    89,    57,   -34,    58,    87,   -34,    59,   -58,
-     -62,    50,    19,    82,   -63,    78,   -95,   126,    79,   117,
-     136,   132,   129,   133,   112,   134,   141,    37,    39,    38,
-    -103,    46,   135,   136,  -109,    66,    33,  -109,    83,  -110,
-      39,   110,  -110,   111,   112,   113,    57,    84,    58,    68,
-      34,    59,   114,    69,    59,   -46,   -94,    68,     9,    49,
-      10,    69,    59,   -47,   -46,    50,    92,  -104,    93,    94,
-      95,   124,   -47,   139,   -39,  -105,   140,    96,   121,   132,
-      97,   133,   112,   134,    -2,     1,    -3,     1,   118,    14,
-     135,    10,     2,     3,     2,     3,    20,    25,    21,    21,
-      55,   102,    38,   103,    17,    28,    32,    47,    43,    56,
-      86,    80,    67,   122,   142,   128,   130,     0,     0,     0,
-       0,     0,     0,   131
+     118,   109,    88,   102,   -58,   103,    81,   121,    78,    83,
+      33,    92,    89,    93,    94,    95,   143,    18,    84,   -58,
+     -62,    50,    96,    82,   -63,    78,    34,    97,   118,  -111,
+    -111,   138,   110,   130,   111,   112,   113,   110,    29,   111,
+     112,   113,    66,   114,    49,   138,    87,   115,   114,    68,
+      50,  -104,   132,    69,    59,   -46,    68,  -105,   127,   -39,
+      69,    59,   -47,    57,   -46,    58,  -106,     9,    59,    10,
+      19,   -47,   -96,   -96,    37,   122,    38,   134,    79,   135,
+     112,   136,   134,   119,   135,   112,   136,    39,   137,    17,
+    -110,  -110,    28,   137,    -2,     1,    -3,     1,    14,    20,
+      10,    21,     2,     3,     2,     3,    57,    25,    58,    21,
+      55,    59,    38,   102,    32,   103,   -34,   -34,    39,    46,
+      47,    56,   125,   126,   141,   142,    67,    43,   131,    86,
+     123,    80,   133,   129,   144
 };
 
-static const yytype_int16 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      97,    91,     1,     1,     3,     3,     1,     1,    54,     0,
-      13,     1,    11,     1,    14,     3,    18,    17,     6,    18,
-      18,     7,     5,    18,    18,    71,    16,    17,    16,   126,
-     127,     1,   122,     3,     4,     5,     1,     1,    14,     3,
-      13,    17,    12,   140,    14,    16,     1,    17,     1,    14,
-      14,     1,    17,     3,     4,     5,     1,    10,     3,     1,
-      15,     6,    12,     5,     6,     7,    16,     1,     1,     1,
-       3,     5,     6,     7,    16,     7,     1,    13,     3,     4,
-       5,    16,    16,    14,    16,    13,    17,    12,    17,     1,
-      15,     3,     4,     5,     0,     1,     0,     1,    13,     1,
-      12,     3,     8,     9,     8,     9,     1,     1,     3,     3,
-       1,     1,     3,     3,     3,    15,    26,    41,    32,    46,
-      71,    60,    52,   108,   140,   121,   123,    -1,    -1,    -1,
-      -1,    -1,    -1,   126
+      97,    91,     1,     1,     3,     3,     1,     1,    54,     1,
+       1,     1,    11,     3,     4,     5,     1,     0,    10,    18,
+      18,     7,    12,    18,    18,    71,    17,    17,   125,    14,
+      15,   128,     1,   123,     3,     4,     5,     1,    13,     3,
+       4,     5,    16,    12,     1,   142,    18,    16,    12,     1,
+       7,    13,    16,     5,     6,     7,     1,    13,     1,    16,
+       5,     6,     7,     1,    16,     3,    13,     1,     6,     3,
+       5,    16,    15,    16,     1,    15,     3,     1,    16,     3,
+       4,     5,     1,    13,     3,     4,     5,    14,    12,     3,
+      14,    15,    15,    12,     0,     1,     0,     1,     1,     1,
+       3,     3,     8,     9,     8,     9,     1,     1,     3,     3,
+       1,     6,     3,     1,    26,     3,    14,    15,    14,    15,
+      41,    46,    15,    16,    14,    15,    52,    32,   124,    71,
+     108,    60,   125,   122,   142
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -684,18 +675,18 @@ static const yytype_uint8 yystos[] =
        0,     1,     8,     9,    20,    21,    22,    23,    24,     1,
        3,    25,    26,    33,     1,    29,    30,    33,     0,    22,
        1,     3,    27,    28,    34,     1,    31,    32,    34,    13,
-      35,    36,    35,     1,    15,    40,    42,     1,     3,    14,
-      37,    38,    39,    42,    62,    41,    17,    37,    63,     1,
+      35,    36,    35,     1,    17,    40,    42,     1,     3,    14,
+      37,    38,    39,    42,    62,    41,    15,    37,    63,     1,
        7,    43,    44,    45,    46,     1,    39,     1,     3,     6,
       64,    65,    66,    67,    68,    71,    16,    45,     1,     5,
       47,    48,    49,    50,    51,    52,    54,    56,    71,    16,
       65,     1,    18,     1,    10,    69,    49,    18,     1,    11,
-      55,    70,     1,     3,     4,     5,    12,    15,    72,    73,
+      55,    70,     1,     3,     4,     5,    12,    17,    72,    73,
       76,    77,     1,     3,    57,    58,    59,    60,    61,    72,
-       1,     3,     4,     5,    12,    74,    75,    77,    13,    78,
-       1,    17,    69,    53,    16,     1,    17,    79,    60,    72,
-      57,    74,     1,     3,     5,    12,    77,    80,    81,    14,
-      17,     1,    81
+       1,     3,     4,     5,    12,    16,    74,    75,    77,    13,
+      78,     1,    15,    69,    53,    15,    16,     1,    79,    60,
+      72,    57,    16,    75,     1,     3,     5,    12,    77,    80,
+      81,    14,    15,     1,    81
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -710,9 +701,9 @@ static const yytype_uint8 yyr1[] =
       56,    56,    57,    57,    57,    58,    59,    59,    60,    61,
       61,    63,    62,    64,    64,    65,    65,    66,    66,    67,
       68,    68,    69,    69,    70,    71,    72,    72,    72,    72,
-      72,    72,    72,    73,    74,    74,    74,    74,    75,    75,
-      75,    75,    75,    76,    76,    76,    77,    79,    78,    80,
-      80,    80,    80,    81,    81,    81,    81,    81
+      72,    72,    72,    73,    73,    73,    74,    74,    74,    75,
+      75,    75,    75,    75,    76,    76,    76,    77,    79,    78,
+      80,    80,    80,    80,    81,    81,    81,    81,    81
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -727,9 +718,9 @@ static const yytype_uint8 yyr2[] =
        1,     1,     0,     1,     2,     1,     1,     3,     3,     1,
        1,     0,     4,     1,     2,     1,     1,     2,     2,     3,
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-       1,     1,     1,     3,     0,     1,     3,     2,     1,     1,
-       1,     1,     1,     1,     1,     1,     2,     0,     4,     0,
-       1,     3,     2,     1,     1,     1,     1,     1
+       1,     1,     1,     2,     3,     4,     1,     3,     2,     1,
+       1,     1,     1,     1,     1,     1,     1,     2,     0,     4,
+       0,     1,     3,     2,     1,     1,     1,     1,     1
 };
 
 
@@ -1406,16 +1397,16 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 89 "cf3parse.y" /* yacc.c:1646  */
+#line 88 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParseError("Expected 'bundle' or 'body' keyword, wrong input '%s'", yytext);
                            YYABORT;
                        }
-#line 1415 "cf3parse.c" /* yacc.c:1646  */
+#line 1406 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 101 "cf3parse.y" /* yacc.c:1646  */
+#line 100 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:bundle:%s\n", P.blocktype);
                            P.block = "bundle";
@@ -1430,11 +1421,11 @@ yyreduce:
                            P.currentstring = NULL;
                            strcpy(P.blockid,"");
                        }
-#line 1434 "cf3parse.c" /* yacc.c:1646  */
+#line 1425 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 117 "cf3parse.y" /* yacc.c:1646  */
+#line 116 "cf3parse.y" /* yacc.c:1646  */
     {
                            /* FIXME: We keep it here, because we skip unknown
                             * promise bundles. Ought to be moved to
@@ -1447,40 +1438,40 @@ yyreduce:
                                INSTALL_SKIP = true;
                            }
                        }
-#line 1451 "cf3parse.c" /* yacc.c:1646  */
+#line 1442 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 130 "cf3parse.y" /* yacc.c:1646  */
+#line 129 "cf3parse.y" /* yacc.c:1646  */
     {
                            yyclearin;
                            ParseError("Expected bundle type, wrong input '%s'", yytext);
                            INSTALL_SKIP = true;
                        }
-#line 1461 "cf3parse.c" /* yacc.c:1646  */
+#line 1452 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 137 "cf3parse.y" /* yacc.c:1646  */
+#line 136 "cf3parse.y" /* yacc.c:1646  */
     {
                           ParserDebug("\tP:bundle:%s:%s\n", P.blocktype, P.blockid);
                           CURRENT_BLOCKID_LINE = P.line_no;
                        }
-#line 1470 "cf3parse.c" /* yacc.c:1646  */
+#line 1461 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 144 "cf3parse.y" /* yacc.c:1646  */
+#line 143 "cf3parse.y" /* yacc.c:1646  */
     {
                            yyclearin;
                            ParseError("Expected bundle identifier, wrong input '%s'", yytext);
                            INSTALL_SKIP = true;
                        }
-#line 1480 "cf3parse.c" /* yacc.c:1646  */
+#line 1471 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 153 "cf3parse.y" /* yacc.c:1646  */
+#line 152 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:body:%s\n", P.blocktype);
                            P.block = "body";
@@ -1493,113 +1484,113 @@ yyreduce:
                            }
                            P.currentstring = NULL;
                        }
-#line 1497 "cf3parse.c" /* yacc.c:1646  */
+#line 1488 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 167 "cf3parse.y" /* yacc.c:1646  */
+#line 166 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (!BodySyntaxGet(P.blocktype))
                            {
                                ParseError("Unknown body type '%s'", P.blocktype);
                            }
                        }
-#line 1508 "cf3parse.c" /* yacc.c:1646  */
+#line 1499 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 174 "cf3parse.y" /* yacc.c:1646  */
+#line 173 "cf3parse.y" /* yacc.c:1646  */
     {
                            yyclearin;
                            ParseError("Expected body type, wrong input '%s'", yytext);
                        }
-#line 1517 "cf3parse.c" /* yacc.c:1646  */
+#line 1508 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 180 "cf3parse.y" /* yacc.c:1646  */
+#line 179 "cf3parse.y" /* yacc.c:1646  */
     {
                           ParserDebug("\tP:body:%s:%s\n", P.blocktype, P.blockid);
                           CURRENT_BLOCKID_LINE = P.line_no;
                        }
-#line 1526 "cf3parse.c" /* yacc.c:1646  */
+#line 1517 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 187 "cf3parse.y" /* yacc.c:1646  */
+#line 186 "cf3parse.y" /* yacc.c:1646  */
     {
                            yyclearin;
                            ParseError("Expected body identifier, wrong input '%s'", yytext);
                            INSTALL_SKIP = true;
                        }
-#line 1536 "cf3parse.c" /* yacc.c:1646  */
+#line 1527 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 196 "cf3parse.y" /* yacc.c:1646  */
+#line 195 "cf3parse.y" /* yacc.c:1646  */
     {
                            strncpy(P.blocktype,P.currentid,CF_MAXVARSIZE);
 
                            RlistDestroy(P.useargs);
                            P.useargs = NULL;
                        }
-#line 1547 "cf3parse.c" /* yacc.c:1646  */
+#line 1538 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 206 "cf3parse.y" /* yacc.c:1646  */
+#line 205 "cf3parse.y" /* yacc.c:1646  */
     {
                            strncpy(P.blockid,P.currentid,CF_MAXVARSIZE);
                            P.offsets.last_block_id = P.offsets.last_id;
                        }
-#line 1556 "cf3parse.c" /* yacc.c:1646  */
+#line 1547 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 217 "cf3parse.y" /* yacc.c:1646  */
+#line 216 "cf3parse.y" /* yacc.c:1646  */
     {
                           yyclearin;
                           ParseError("Error in bundle parameter list, expected ')', wrong input '%s'", yytext);
                        }
-#line 1565 "cf3parse.c" /* yacc.c:1646  */
+#line 1556 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 223 "cf3parse.y" /* yacc.c:1646  */
+#line 222 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:%s:%s:%s arglist begin:%s\n", P.block,P.blocktype,P.blockid, yytext);
                        }
-#line 1573 "cf3parse.c" /* yacc.c:1646  */
+#line 1564 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 228 "cf3parse.y" /* yacc.c:1646  */
+#line 227 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:%s:%s:%s arglist end:%s\n", P.block,P.blocktype,P.blockid, yytext);
                        }
-#line 1581 "cf3parse.c" /* yacc.c:1646  */
+#line 1572 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 240 "cf3parse.y" /* yacc.c:1646  */
+#line 239 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:%s:%s:%s  arg id: %s\n", P.block,P.blocktype,P.blockid, P.currentid);
                            RlistAppendScalar(&(P.useargs),P.currentid);
                        }
-#line 1590 "cf3parse.c" /* yacc.c:1646  */
+#line 1581 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 245 "cf3parse.y" /* yacc.c:1646  */
+#line 244 "cf3parse.y" /* yacc.c:1646  */
     {
                           yyclearin;
                           ParseError("Expected identifier, wrong input '%s'", yytext);
                        }
-#line 1599 "cf3parse.c" /* yacc.c:1646  */
+#line 1590 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 253 "cf3parse.y" /* yacc.c:1646  */
+#line 252 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (RelevantBundle(CF_AGENTTYPES[P.agent_type], P.blocktype))
                            {
@@ -1624,11 +1615,11 @@ yyreduce:
                            RlistDestroy(P.useargs);
                            P.useargs = NULL;
                        }
-#line 1628 "cf3parse.c" /* yacc.c:1646  */
+#line 1619 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 281 "cf3parse.y" /* yacc.c:1646  */
+#line 280 "cf3parse.y" /* yacc.c:1646  */
     {
                            INSTALL_SKIP = false;
                            P.offsets.last_id = -1;
@@ -1640,38 +1631,38 @@ yyreduce:
                                P.currentbundle->offset.end = P.offsets.current;
                            }
                        }
-#line 1644 "cf3parse.c" /* yacc.c:1646  */
+#line 1635 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 296 "cf3parse.y" /* yacc.c:1646  */
+#line 295 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:%s:%s:%s begin body open\n", P.block,P.blocktype,P.blockid);
                        }
-#line 1652 "cf3parse.c" /* yacc.c:1646  */
+#line 1643 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 300 "cf3parse.y" /* yacc.c:1646  */
+#line 299 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParseError("Expected body open '{', wrong input '%s'", yytext);
                        }
-#line 1660 "cf3parse.c" /* yacc.c:1646  */
+#line 1651 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 315 "cf3parse.y" /* yacc.c:1646  */
+#line 314 "cf3parse.y" /* yacc.c:1646  */
     {
                           INSTALL_SKIP = true;
                           ParseError("Expected promise type, got '%s'", yytext);
                           ParserDebug("P:promise_type:error yychar = %d, %c, yyempty = %d\n", yychar, yychar, YYEMPTY);
                           yyclearin; 
                        }
-#line 1671 "cf3parse.c" /* yacc.c:1646  */
+#line 1662 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 330 "cf3parse.y" /* yacc.c:1646  */
+#line 329 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s promise_type = %s\n", P.block, P.blocktype, P.blockid, P.currenttype);
 
@@ -1711,11 +1702,11 @@ yyreduce:
                                INSTALL_SKIP = true;
                            }
                        }
-#line 1715 "cf3parse.c" /* yacc.c:1646  */
+#line 1706 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 390 "cf3parse.y" /* yacc.c:1646  */
+#line 389 "cf3parse.y" /* yacc.c:1646  */
     {
                            /*
                             * Based on yychar display right error message
@@ -1739,11 +1730,11 @@ yyreduce:
                            }
                            yyclearin;
                        }
-#line 1743 "cf3parse.c" /* yacc.c:1646  */
+#line 1734 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 425 "cf3parse.y" /* yacc.c:1646  */
+#line 424 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (!INSTALL_SKIP)
                            {
@@ -1764,11 +1755,11 @@ yyreduce:
                                P.currentpromise = NULL;
                            }
                        }
-#line 1768 "cf3parse.c" /* yacc.c:1646  */
+#line 1759 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 451 "cf3parse.y" /* yacc.c:1646  */
+#line 450 "cf3parse.y" /* yacc.c:1646  */
     {
 
                            if (!INSTALL_SKIP)
@@ -1790,11 +1781,11 @@ yyreduce:
                                P.currentpromise = NULL;
                            }
                        }
-#line 1794 "cf3parse.c" /* yacc.c:1646  */
+#line 1785 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 478 "cf3parse.y" /* yacc.c:1646  */
+#line 477 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (P.promiser)
                            {
@@ -1805,11 +1796,11 @@ yyreduce:
                            CURRENT_PROMISER_LINE = P.line_no;
                            ParserDebug("\tP:%s:%s:%s:%s:%s promiser = %s\n", P.block, P.blocktype, P.blockid, P.currenttype, P.currentclasses ? P.currentclasses : "any", P.promiser);
                        }
-#line 1809 "cf3parse.c" /* yacc.c:1646  */
+#line 1800 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 489 "cf3parse.y" /* yacc.c:1646  */
+#line 488 "cf3parse.y" /* yacc.c:1646  */
     {
                           INSTALL_SKIP = true;
                           ParserDebug("P:promiser:qstring::error yychar = %d\n", yychar);
@@ -1828,11 +1819,11 @@ yyreduce:
 
                           yyclearin;
                        }
-#line 1832 "cf3parse.c" /* yacc.c:1646  */
+#line 1823 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 64:
-#line 513 "cf3parse.y" /* yacc.c:1646  */
+#line 512 "cf3parse.y" /* yacc.c:1646  */
     {
                                    /*
                                     * Based on next token id display right error message
@@ -1849,11 +1840,11 @@ yyreduce:
                                    yyclearin;
 
                                 }
-#line 1853 "cf3parse.c" /* yacc.c:1646  */
+#line 1844 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 534 "cf3parse.y" /* yacc.c:1646  */
+#line 533 "cf3parse.y" /* yacc.c:1646  */
     {
                            /* Don't free these */
                            strcpy(P.currentid,"");
@@ -1869,11 +1860,11 @@ yyreduce:
                            P.promisee = NULL;
                            /* reset argptrs etc*/
                        }
-#line 1873 "cf3parse.c" /* yacc.c:1646  */
+#line 1864 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 68:
-#line 561 "cf3parse.y" /* yacc.c:1646  */
+#line 560 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (!INSTALL_SKIP)
                            {
@@ -1941,11 +1932,11 @@ yyreduce:
                                P.rval = RvalNew(NULL, RVAL_TYPE_NOPROMISEE);
                            }
                        }
-#line 1945 "cf3parse.c" /* yacc.c:1646  */
+#line 1936 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 69:
-#line 632 "cf3parse.y" /* yacc.c:1646  */
+#line 631 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s:%s:%s attribute = %s\n", P.block, P.blocktype, P.blockid, P.currenttype, P.currentclasses ? P.currentclasses : "any", P.promiser, P.currentid);
 
@@ -1965,19 +1956,19 @@ yyreduce:
                            RlistDestroy(P.currentRlist);
                            P.currentRlist = NULL;
                        }
-#line 1969 "cf3parse.c" /* yacc.c:1646  */
+#line 1960 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 70:
-#line 652 "cf3parse.y" /* yacc.c:1646  */
+#line 651 "cf3parse.y" /* yacc.c:1646  */
     {
                              ParseError("Expected attribute, got '%s'\n", yytext);
                        }
-#line 1977 "cf3parse.c" /* yacc.c:1646  */
+#line 1968 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 659 "cf3parse.y" /* yacc.c:1646  */
+#line 658 "cf3parse.y" /* yacc.c:1646  */
     {
                            const BodySyntax *body_syntax = BodySyntaxGet(P.blocktype);
 
@@ -2013,11 +2004,11 @@ yyreduce:
 
                            strcpy(P.currentid,"");
                        }
-#line 2017 "cf3parse.c" /* yacc.c:1646  */
+#line 2008 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 72:
-#line 698 "cf3parse.y" /* yacc.c:1646  */
+#line 697 "cf3parse.y" /* yacc.c:1646  */
     {
                            P.offsets.last_id = -1;
                            P.offsets.last_string = -1;
@@ -2027,19 +2018,19 @@ yyreduce:
                                P.currentbody->offset.end = P.offsets.current;
                            }
                        }
-#line 2031 "cf3parse.c" /* yacc.c:1646  */
+#line 2022 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 78:
-#line 722 "cf3parse.y" /* yacc.c:1646  */
+#line 721 "cf3parse.y" /* yacc.c:1646  */
     {
                           ParseError("Expected ';' check previous statement, got '%s'", yytext);
                        }
-#line 2039 "cf3parse.c" /* yacc.c:1646  */
+#line 2030 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 79:
-#line 731 "cf3parse.y" /* yacc.c:1646  */
+#line 730 "cf3parse.y" /* yacc.c:1646  */
     {
 
                            if (!INSTALL_SKIP)
@@ -2114,11 +2105,11 @@ yyreduce:
                            RvalDestroy(P.rval);
                            P.rval = RvalNew(NULL, RVAL_TYPE_NOPROMISEE);
                        }
-#line 2118 "cf3parse.c" /* yacc.c:1646  */
+#line 2109 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 80:
-#line 809 "cf3parse.y" /* yacc.c:1646  */
+#line 808 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s attribute = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
 
@@ -2137,11 +2128,11 @@ yyreduce:
                            RlistDestroy(P.currentRlist);
                            P.currentRlist = NULL;
                        }
-#line 2141 "cf3parse.c" /* yacc.c:1646  */
+#line 2132 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 81:
-#line 828 "cf3parse.y" /* yacc.c:1646  */
+#line 827 "cf3parse.y" /* yacc.c:1646  */
     {
                           ParserDebug("P:selection_id:idsyntax:error yychar = %d\n", yychar);
 
@@ -2159,36 +2150,36 @@ yyreduce:
 
                           yyclearin;
                        }
-#line 2163 "cf3parse.c" /* yacc.c:1646  */
+#line 2154 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 82:
-#line 849 "cf3parse.y" /* yacc.c:1646  */
+#line 848 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:=>\n");
                        }
-#line 2171 "cf3parse.c" /* yacc.c:1646  */
+#line 2162 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 83:
-#line 853 "cf3parse.y" /* yacc.c:1646  */
+#line 852 "cf3parse.y" /* yacc.c:1646  */
     {
                           yyclearin;
                           ParseError("Expected '=>', got '%s'", yytext);
                        }
-#line 2180 "cf3parse.c" /* yacc.c:1646  */
+#line 2171 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 84:
-#line 861 "cf3parse.y" /* yacc.c:1646  */
+#line 860 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:->\n");
                        }
-#line 2188 "cf3parse.c" /* yacc.c:1646  */
+#line 2179 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 85:
-#line 875 "cf3parse.y" /* yacc.c:1646  */
+#line 874 "cf3parse.y" /* yacc.c:1646  */
     {
                            P.offsets.last_class_id = P.offsets.current - strlen(P.currentclasses) - 2;
                            ParserDebug("\tP:%s:%s:%s:%s class = %s\n", P.block, P.blocktype, P.blockid, P.currenttype, yytext);
@@ -2201,33 +2192,33 @@ yyreduce:
 
                            free(literal);
                        }
-#line 2205 "cf3parse.c" /* yacc.c:1646  */
+#line 2196 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 86:
-#line 895 "cf3parse.y" /* yacc.c:1646  */
+#line 894 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s id rval, %s = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.lval, P.currentid);
                            RvalDestroy(P.rval);
                            P.rval = (Rval) { xstrdup(P.currentid), RVAL_TYPE_SCALAR };
                            P.references_body = true;
                        }
-#line 2216 "cf3parse.c" /* yacc.c:1646  */
+#line 2207 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 87:
-#line 902 "cf3parse.y" /* yacc.c:1646  */
+#line 901 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s blockid rval, %s = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.lval, P.currentid);
                            RvalDestroy(P.rval);
                            P.rval = (Rval) { xstrdup(P.currentid), RVAL_TYPE_SCALAR };
                            P.references_body = true;
                        }
-#line 2227 "cf3parse.c" /* yacc.c:1646  */
+#line 2218 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 88:
-#line 909 "cf3parse.y" /* yacc.c:1646  */
+#line 908 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s qstring rval, %s = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.lval, P.currentstring);
                            RvalDestroy(P.rval);
@@ -2244,11 +2235,11 @@ yyreduce:
                                }
                            }
                        }
-#line 2248 "cf3parse.c" /* yacc.c:1646  */
+#line 2239 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 89:
-#line 926 "cf3parse.y" /* yacc.c:1646  */
+#line 925 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s nakedvar rval, %s = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.lval, P.currentstring);
                            RvalDestroy(P.rval);
@@ -2257,11 +2248,11 @@ yyreduce:
                            P.currentstring = NULL;
                            P.references_body = false;
                        }
-#line 2261 "cf3parse.c" /* yacc.c:1646  */
+#line 2252 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 90:
-#line 935 "cf3parse.y" /* yacc.c:1646  */
+#line 934 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s install list =  %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.lval);
                            if (RlistLen(P.currentRlist) == 0)
@@ -2274,31 +2265,31 @@ yyreduce:
                            P.currentRlist = NULL;
                            P.references_body = false;
                        }
-#line 2278 "cf3parse.c" /* yacc.c:1646  */
+#line 2269 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 91:
-#line 948 "cf3parse.y" /* yacc.c:1646  */
+#line 947 "cf3parse.y" /* yacc.c:1646  */
     {
                            RvalDestroy(P.rval);
                            P.rval = (Rval) { P.currentfncall[P.arg_nesting+1], RVAL_TYPE_FNCALL };
                            P.currentfncall[P.arg_nesting+1] = NULL;
                            P.references_body = false;
                        }
-#line 2289 "cf3parse.c" /* yacc.c:1646  */
+#line 2280 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 92:
-#line 956 "cf3parse.y" /* yacc.c:1646  */
+#line 955 "cf3parse.y" /* yacc.c:1646  */
     {
                            yyclearin;
                            ParseError("Invalid r-value type '%s'", yytext);
                        }
-#line 2298 "cf3parse.c" /* yacc.c:1646  */
+#line 2289 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 97:
-#line 971 "cf3parse.y" /* yacc.c:1646  */
+  case 98:
+#line 972 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:rval:list:error yychar = %d\n", yychar);
                            if ( yychar ==';' )
@@ -2307,7 +2298,9 @@ yyreduce:
                            }
                            else if ( yychar == ASSIGN )
                            {
-                               ParseError("Check list statement  previous line, Expected '}', wrong input '%s'", yytext);
+                               ParseError("Check list statement previous line,"
+                                          " Expected '}', wrong input '%s'",
+                                          yytext);
                            }
                            else
                            {
@@ -2315,96 +2308,108 @@ yyreduce:
                            }
                            yyclearin;
                        }
-#line 2319 "cf3parse.c" /* yacc.c:1646  */
-    break;
-
-  case 98:
-#line 991 "cf3parse.y" /* yacc.c:1646  */
-    { 
-                           ParserDebug("\tP:%s:%s:%s:%s list append; id = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
-                           RlistAppendScalar((Rlist **)&P.currentRlist, P.currentid);
-                       }
-#line 2328 "cf3parse.c" /* yacc.c:1646  */
+#line 2312 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 99:
-#line 997 "cf3parse.y" /* yacc.c:1646  */
+#line 994 "cf3parse.y" /* yacc.c:1646  */
     {
-                           ParserDebug("\tP:%s:%s:%s:%s list append: qstring = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentstring);
-                           RlistAppendScalar((Rlist **)&P.currentRlist,(void *)P.currentstring);
-                           free(P.currentstring);
-                           P.currentstring = NULL;
+                           ParserDebug("\tP:%s:%s:%s:%s list append: "
+                                       "id = %s\n",
+                                       P.block, P.blocktype, P.blockid,
+                                       (P.currentclasses ?
+                                            P.currentclasses : "any"),
+                                       P.currentid);
+                           RlistAppendScalar((Rlist **) &P.currentRlist,
+                                             P.currentid);
                        }
-#line 2339 "cf3parse.c" /* yacc.c:1646  */
+#line 2327 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 100:
-#line 1005 "cf3parse.y" /* yacc.c:1646  */
+#line 1006 "cf3parse.y" /* yacc.c:1646  */
+    {
+                           ParserDebug("\tP:%s:%s:%s:%s list append: "
+                                       "qstring = %s\n",
+                                       P.block, P.blocktype, P.blockid,
+                                       (P.currentclasses ?
+                                            P.currentclasses : "any"),
+                                       P.currentstring);
+                           RlistAppendScalar((Rlist **) &P.currentRlist,
+                                             (void *) P.currentstring);
+                           free(P.currentstring);
+                           P.currentstring = NULL;
+                       }
+#line 2344 "cf3parse.c" /* yacc.c:1646  */
+    break;
+
+  case 101:
+#line 1020 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s list append: nakedvar = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentstring);
                            RlistAppendScalar((Rlist **)&P.currentRlist,(void *)P.currentstring);
                            free(P.currentstring);
                            P.currentstring = NULL;
                        }
-#line 2350 "cf3parse.c" /* yacc.c:1646  */
+#line 2355 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 101:
-#line 1013 "cf3parse.y" /* yacc.c:1646  */
+  case 102:
+#line 1028 "cf3parse.y" /* yacc.c:1646  */
     {
                            RlistAppend(&P.currentRlist, P.currentfncall[P.arg_nesting+1], RVAL_TYPE_FNCALL);
                            FnCallDestroy(P.currentfncall[P.arg_nesting+1]);
                            P.currentfncall[P.arg_nesting+1] = NULL;
                        }
-#line 2360 "cf3parse.c" /* yacc.c:1646  */
+#line 2365 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 102:
-#line 1020 "cf3parse.y" /* yacc.c:1646  */
+  case 103:
+#line 1035 "cf3parse.y" /* yacc.c:1646  */
     {
                           yyclearin;
                           ParseError("Invalid input for a list item, got '%s'", yytext);
                        }
-#line 2369 "cf3parse.c" /* yacc.c:1646  */
-    break;
-
-  case 103:
-#line 1028 "cf3parse.y" /* yacc.c:1646  */
-    {
-                           ParserDebug("\tP:%s:%s:%s:%s function id = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
-                       }
-#line 2377 "cf3parse.c" /* yacc.c:1646  */
+#line 2374 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 104:
-#line 1032 "cf3parse.y" /* yacc.c:1646  */
+#line 1043 "cf3parse.y" /* yacc.c:1646  */
     {
-                           ParserDebug("\tP:%s:%s:%s:%s function blockid = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
+                           ParserDebug("\tP:%s:%s:%s:%s function id = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
                        }
-#line 2385 "cf3parse.c" /* yacc.c:1646  */
+#line 2382 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 105:
-#line 1036 "cf3parse.y" /* yacc.c:1646  */
+#line 1047 "cf3parse.y" /* yacc.c:1646  */
+    {
+                           ParserDebug("\tP:%s:%s:%s:%s function blockid = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentid);
+                       }
+#line 2390 "cf3parse.c" /* yacc.c:1646  */
+    break;
+
+  case 106:
+#line 1051 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s function nakedvar = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentstring);
                            strncpy(P.currentid,P.currentstring,CF_MAXVARSIZE); // Make a var look like an ID
                            free(P.currentstring);
                            P.currentstring = NULL;
                        }
-#line 2396 "cf3parse.c" /* yacc.c:1646  */
-    break;
-
-  case 106:
-#line 1049 "cf3parse.y" /* yacc.c:1646  */
-    {
-                           ParserDebug("\tP:%s:%s:%s:%s Finished with function, now at level %d\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.arg_nesting);
-                       }
-#line 2404 "cf3parse.c" /* yacc.c:1646  */
+#line 2401 "cf3parse.c" /* yacc.c:1646  */
     break;
 
   case 107:
-#line 1056 "cf3parse.y" /* yacc.c:1646  */
+#line 1064 "cf3parse.y" /* yacc.c:1646  */
+    {
+                           ParserDebug("\tP:%s:%s:%s:%s Finished with function, now at level %d\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.arg_nesting);
+                       }
+#line 2409 "cf3parse.c" /* yacc.c:1646  */
+    break;
+
+  case 108:
+#line 1071 "cf3parse.y" /* yacc.c:1646  */
     {
                            if (++P.arg_nesting >= CF_MAX_NESTING)
                            {
@@ -2413,11 +2418,11 @@ yyreduce:
                            P.currentfnid[P.arg_nesting] = xstrdup(P.currentid);
                            ParserDebug("\tP:%s:%s:%s begin givearglist for function %s, level %d\n", P.block,P.blocktype,P.blockid, P.currentfnid[P.arg_nesting], P.arg_nesting );
                        }
-#line 2417 "cf3parse.c" /* yacc.c:1646  */
+#line 2422 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 108:
-#line 1068 "cf3parse.y" /* yacc.c:1646  */
+  case 109:
+#line 1083 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s end givearglist for function %s, level %d\n", P.block,P.blocktype,P.blockid, P.currentfnid[P.arg_nesting], P.arg_nesting );
                            P.currentfncall[P.arg_nesting] = FnCallNew(P.currentfnid[P.arg_nesting], P.giveargs[P.arg_nesting]);
@@ -2427,30 +2432,30 @@ yyreduce:
                            P.currentfnid[P.arg_nesting] = NULL;
                            P.arg_nesting--;
                        }
-#line 2431 "cf3parse.c" /* yacc.c:1646  */
+#line 2436 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 112:
-#line 1085 "cf3parse.y" /* yacc.c:1646  */
+  case 113:
+#line 1100 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParseError("Expected ',', wrong input '%s'", yytext);
                            yyclearin;
                        }
-#line 2440 "cf3parse.c" /* yacc.c:1646  */
+#line 2445 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 113:
-#line 1093 "cf3parse.y" /* yacc.c:1646  */
+  case 114:
+#line 1108 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("\tP:%s:%s:%s:%s function %s, id arg = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentfnid[P.arg_nesting], P.currentid);
                            /* currently inside a use function */
                            RlistAppendScalar(&P.giveargs[P.arg_nesting],P.currentid);
                        }
-#line 2450 "cf3parse.c" /* yacc.c:1646  */
+#line 2455 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 114:
-#line 1100 "cf3parse.y" /* yacc.c:1646  */
+  case 115:
+#line 1115 "cf3parse.y" /* yacc.c:1646  */
     {
                            /* currently inside a use function */
                            ParserDebug("\tP:%s:%s:%s:%s function %s, qstring arg = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentfnid[P.arg_nesting], P.currentstring);
@@ -2458,11 +2463,11 @@ yyreduce:
                            free(P.currentstring);
                            P.currentstring = NULL;
                        }
-#line 2462 "cf3parse.c" /* yacc.c:1646  */
+#line 2467 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 115:
-#line 1109 "cf3parse.y" /* yacc.c:1646  */
+  case 116:
+#line 1124 "cf3parse.y" /* yacc.c:1646  */
     {
                            /* currently inside a use function */
                            ParserDebug("\tP:%s:%s:%s:%s function %s, nakedvar arg = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentfnid[P.arg_nesting], P.currentstring);
@@ -2470,11 +2475,11 @@ yyreduce:
                            free(P.currentstring);
                            P.currentstring = NULL;
                        }
-#line 2474 "cf3parse.c" /* yacc.c:1646  */
+#line 2479 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 116:
-#line 1118 "cf3parse.y" /* yacc.c:1646  */
+  case 117:
+#line 1133 "cf3parse.y" /* yacc.c:1646  */
     {
                            /* Careful about recursion */
                            ParserDebug("\tP:%s:%s:%s:%s function %s, nakedvar arg = %s\n", P.block, P.blocktype, P.blockid, P.currentclasses ? P.currentclasses : "any", P.currentfnid[P.arg_nesting], P.currentstring);
@@ -2482,11 +2487,11 @@ yyreduce:
                            RvalDestroy((Rval) { P.currentfncall[P.arg_nesting+1], RVAL_TYPE_FNCALL });
                            P.currentfncall[P.arg_nesting+1] = NULL;
                        }
-#line 2486 "cf3parse.c" /* yacc.c:1646  */
+#line 2491 "cf3parse.c" /* yacc.c:1646  */
     break;
 
-  case 117:
-#line 1127 "cf3parse.y" /* yacc.c:1646  */
+  case 118:
+#line 1142 "cf3parse.y" /* yacc.c:1646  */
     {
                            ParserDebug("P:rval:function:gaitem:error yychar = %d\n", yychar);
                            if (yychar == ';')
@@ -2503,11 +2508,11 @@ yyreduce:
                            }
                            yyclearin;
                        }
-#line 2507 "cf3parse.c" /* yacc.c:1646  */
+#line 2512 "cf3parse.c" /* yacc.c:1646  */
     break;
 
 
-#line 2511 "cf3parse.c" /* yacc.c:1646  */
+#line 2516 "cf3parse.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2735,7 +2740,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1144 "cf3parse.y" /* yacc.c:1906  */
+#line 1159 "cf3parse.y" /* yacc.c:1906  */
 
 
 /*****************************************************************/
