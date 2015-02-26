@@ -1,8 +1,8 @@
-Index: Cfengine-debian/cf-agent/Makefile.am
+Index: cfengine3/cf-agent/Makefile.am
 ===================================================================
---- Cfengine-debian.orig/cf-agent/Makefile.am
-+++ Cfengine-debian/cf-agent/Makefile.am
-@@ -27,8 +27,7 @@ AM_LDFLAGS = \
+--- cfengine3.orig/cf-agent/Makefile.am	2015-01-27 14:57:23.000000000 +0100
++++ cfengine3/cf-agent/Makefile.am	2015-02-26 22:49:51.000000000 +0100
+@@ -50,8 +50,7 @@
  	$(LIBVIRT_LDFLAGS) \
  	$(POSTGRESQL_LDFLAGS) \
  	$(MYSQL_LDFLAGS) \
