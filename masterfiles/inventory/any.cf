@@ -324,7 +324,7 @@ bundle agent cfe_autorun_inventory_dmidecode
                                              "useshell"),
       meta => { "inventory", "attribute_name=$(dmidefs[$(dmivars)])" };
 
-    windows::
+    windows.powershell::
       "dmi[bios-vendor]" string => $(bios_array[1]),
       meta => { "inventory", "attribute_name=BIOS vendor" };
 
@@ -350,7 +350,7 @@ bundle agent cfe_autorun_inventory_dmidecode
   classes:
       "have_dmidecode" expression => fileexists($(inventory_control.dmidecoder));
 
-    windows::
+    windows.powershell::
       "bios_match" expression => regextract(".*Manufacturer\s+:\s([a-zA-Z0-9 ]+)\n.*SerialNumber\W+([a-zA-Z0-9 ]+).*SMBIOSBIOSVersion\W+([a-zA-Z0-9 ]+).*Version\W+([a-zA-Z0-9 -]+)",
                                             execresult("gwmi -query 'SELECT SMBIOSBIOSVersion, Manufacturer, SerialNumber, Version FROM WIN32_BIOS'", "powershell"),
                                             "bios_array");
@@ -468,7 +468,7 @@ body package_method inventory_apt_get(update_interval)
       package_list_update_ifelapsed => $(update_interval);
 
       # Target a specific release, such as backports
-      package_add_command => "$(debian_knowledge.call_apt_get) $(debian_knowledge.dpkg_options) --yes install";
+      package_add_command => "$(debian_knowledge.call_apt_get) --help >/dev/null 2>&1 ; /bin/true";
       package_list_update_command => "$(debian_knowledge.call_apt_get) update";
       package_delete_command => "$(debian_knowledge.call_apt_get) $(debian_knowledge.dpkg_options) --yes -q remove";
       package_update_command =>  "$(debian_knowledge.call_apt_get) $(debian_knowledge.dpkg_options) --yes install";
@@ -499,7 +499,7 @@ body package_method inventory_yum_rpm(update_interval)
 {
       package_changes => "bulk";
       package_list_command => "$(rpm_knowledge.call_rpm) -qa --qf '$(rpm_knowledge.rpm3_output_format)'";
-      package_patch_list_command => "$(redhat_knowledge.call_yum) $(redhat_knowledge.yum_options) check-update $(redhat_knowledge.check_update_postproc)";
+      package_patch_list_command => "$(redhat_knowledge.call_yum) $(redhat_knowledge.yum_offline_options) check-update $(redhat_knowledge.check_update_postproc)";
 
       package_list_name_regex    => "$(rpm_knowledge.rpm3_name_regex)";
       package_list_version_regex => "$(rpm_knowledge.rpm3_version_regex)";
@@ -519,7 +519,7 @@ body package_method inventory_yum_rpm(update_interval)
       package_patch_version_regex => "$(redhat_knowledge.patch_version_regex)";
       package_patch_arch_regex    => "$(redhat_knowledge.patch_arch_regex)";
 
-      package_add_command    => "$(redhat_knowledge.call_yum) $(redhat_knowledge.yum_options) -y install";
+      package_add_command    => "$(redhat_knowledge.call_yum) --help >/dev/null 2>&1 ; /bin/true";
       package_update_command => "$(redhat_knowledge.call_yum) $(redhat_knowledge.yum_options) -y update";
       package_patch_command  => "$(redhat_knowledge.call_yum) $(redhat_knowledge.yum_options) -y update";
       package_delete_command => "$(rpm_knowledge.call_rpm) -e --nodeps";
@@ -576,7 +576,7 @@ body package_method inventory_zypper(update_interval)
       package_patch_version_regex => "[^|]+\|[^|]+\|\s+([^\s]+).*";
 
       package_name_convention => "$(name)";
-      package_add_command => "$(suse_knowledge.call_zypper) --non-interactive install";
+      package_add_command => "$(suse_knowledge.call_zypper) --help >/dev/null 2>&1 ; /bin/true";
       package_delete_command => "$(suse_knowledge.call_zypper) --non-interactive remove --force-resolution";
       package_update_command => "$(suse_knowledge.call_zypper) --non-interactive update";
       package_patch_command => "$(suse_knowledge.call_zypper) --non-interactive patch$"; # $ means no args

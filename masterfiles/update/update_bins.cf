@@ -31,11 +31,11 @@ bundle agent cfe_internal_update_bins
       comment => "The Cfengine binary updates directory on the policy host",
       handle => "cfe_internal_update_bins_vars_master_software_location";
 
-      "local_software_dir"        string => translatepath("$(sys.workdir)/software_updates/$(sys.flavour)_$(sys.arch)"),
+      "local_software_dir"        string => translatepath("/var/cfengine/software_updates/$(sys.flavour)_$(sys.arch)"),
       comment => "Local directory containing binary updates for this host",
       handle => "cfe_internal_update_bins_vars_local_software_dir";
 
-      "local_update_log_dir"      string => translatepath("$(sys.workdir)/software_updates/update_log"),
+      "local_update_log_dir"      string => translatepath("/var/cfengine/software_updates/update_log"),
       comment => "Local directory to store update log for this host",
       handle => "cfe_internal_update_bins_vars_local_update_log_dir";
 
@@ -175,7 +175,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2-1",         # Install new Nova anyway
+      package_version => "$(update_def.current_version)-1",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -188,7 +188,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2",         # Install new Nova anyway
+      package_version => "$(update_def.current_version)",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -201,7 +201,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2.0",       # Install new Nova anyway
+      package_version => "$(update_def.current_version)",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -214,7 +214,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2-1",         # Install new Nova anyway
+      package_version => "$(update_def.current_version)-1",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -227,7 +227,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2",         # Install new Nova anyway
+      package_version => "$(update_def.current_version)",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -240,7 +240,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2.0",       # Install new Nova anyway
+      package_version => "$(update_def.current_version).0",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -253,7 +253,7 @@ bundle agent cfe_internal_update_bins
       package_policy => "update",
       package_select => "==",            # picks the newest Nova available
       package_architectures => { "$(pkgarch)" },
-      package_version => "3.6.2.0",       # Install new Nova anyway
+      package_version => "$(update_def.current_version).0",
       package_method => u_generic( "$(local_software_dir)" ),
       ifvarclass => "nova_edition.have_software_dir",
       classes => u_if_else("bin_update_success", "bin_update_fail");
@@ -292,20 +292,6 @@ bundle agent cfe_internal_update_bins
       perms => u_m("0644"),
       ifvarclass => "solarisx86|solaris";
 
-      "$(sys.workdir)/bin/cf-upgrade"
-      comment => "Copy cf-upgrade binary from policy hub for i386 linux",
-      handle => "cfe_internal_update_bins_files_cf_upgrade_i386_linux",
-      copy_from => u_rcp("$(master_software_location)/cf-upgrade/linux.i386/cf-upgrade", @(update_def.policy_servers)),
-      perms => u_m("0755"),
-      ifvarclass => "linux.i686";
-
-      "$(sys.workdir)/bin/cf-upgrade"
-      comment => "Copy cf-upgrade binary from policy hub for x86_64 linux",
-      handle => "cfe_internal_update_bins_files_cf_upgrade_x86_64_linux",
-      copy_from => u_rcp("$(master_software_location)/cf-upgrade/linux.x86_64/cf-upgrade", @(update_def.policy_servers)),
-      perms => u_m("0755"),
-      ifvarclass => "linux.x86_64";
-
       "$(backup_script)"
       comment => "Create a backup script for cf-upgrade",
       handle => "cfe_internal_update_bins_files_backup_script",
@@ -329,6 +315,26 @@ bundle agent cfe_internal_update_bins
       depth_search => u_recurse("1"),  # Nova updates should be in root dir
       action => u_immediate,
       classes => u_if_repaired("bin_newpkg");
+
+    !am_policy_hub.enterprise.trigger_upgrade.(cfengine_3_6_0|cfengine_3_6_1)::
+      "$(sys.bindir)/cf-upgrade"
+      handle => "cfe_internal_update_bins_files_cf_upgrade_i386_linux",
+      copy_from => u_rcp("$(master_software_location)/cf-upgrade/linux.i386/cf-upgrade", @(update_def.policy_servers)),
+      perms => u_m("0755"),
+      ifvarclass => "linux.i686",
+      comment => "The cf-upgrade binary that shipped with 3.6.0 and 3.6.1 was
+                  broken, we need to download a working copy so that upgrades
+                  will work on i386 linux";
+
+      "$(sys.workdir)/bin/cf-upgrade"
+      comment => "Copy cf-upgrade binary from policy hub for x86_64 linux",
+      handle => "cfe_internal_update_bins_files_cf_upgrade_x86_64_linux",
+      copy_from => u_rcp("$(master_software_location)/cf-upgrade/linux.x86_64/cf-upgrade", @(update_def.policy_servers)),
+      perms => u_m("0755"),
+      ifvarclass => "linux.x86_64",
+      comment => "The cf-upgrade binary that shipped with 3.6.0 and 3.6.1 was
+                  broken, we need to download a working copy so that upgrades
+                  will work on x86_64 linux";
 
     bin_update_success.enterprise.trigger_upgrade::
 
@@ -371,7 +377,7 @@ conflict=nocheck
 action=nocheck
 basedir=default";
 
-    sunos_5_9|sunos_5_10::
+    solaris.!sunos_5_8::
 
       "mail=
 instance=overwrite
@@ -403,7 +409,7 @@ bundle edit_line u_backup_script
       "#!/bin/sh
 
 if [ $(const.dollar)1 = \"BACKUP\" ]; then
- tar cfz $(const.dollar)2 /var/cfengine > /dev/null
+ tar cfz $(const.dollar)2 $(sys.workdir) > /dev/null
 fi
 if [ $(const.dollar)1 = \"RESTORE\" ]; then
  tar xfz $(const.dollar)2
@@ -414,7 +420,7 @@ fi";
       "#!/bin/sh
 
 if [ $(const.dollar)1 = \"BACKUP\" ]; then
- tar cf $(const.dollar)2 /var/cfengine;  gzip $(const.dollar)2
+ tar cf $(const.dollar)2 $(sys.workdir);  gzip $(const.dollar)2
 fi
 if [ $(const.dollar)1 = \"RESTORE\" ]; then
  gunzip $(const.dollar)2.gz; tar xf $(const.dollar)2
@@ -447,7 +453,7 @@ bundle edit_line u_install_script
 pkgname=`pkginfo -d $(const.dollar)1 | awk '{print $(const.dollar)2}'`
 /usr/sbin/pkgrm -n -a $(cfe_internal_update_bins.admin_file) $pkgname
 /usr/sbin/pkgadd -n -a $(cfe_internal_update_bins.admin_file) -d $(const.dollar)1 all
-/var/cfengine/bin/cf-execd || true
+$(sys.workdir)/bin/cf-execd || true
 exit 0";
 
 }
@@ -486,7 +492,7 @@ bundle common u_common_knowledge
 # @see common_knowledge
 {
   vars:
-      "list_update_ifelapsed_now" string => "0";
+      "list_update_ifelapsed_now" string => "10080";
 }
 
 ################################################################################
