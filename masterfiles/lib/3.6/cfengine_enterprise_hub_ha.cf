@@ -39,43 +39,43 @@
 # the online docs
 #
 
-# For CFEngine Core: 3.5.0 to 3.5.x
-# Internal hub maintenance bundles
+# For CFEngine Core: 3.6.0 to 3.6.x
 
-###################################################
-# If you find CFEngine useful, please consider    #
-# purchasing a commercial version of the software.#
-###################################################
-
-bundle agent cfe_internal_hub_maintain
-# @brief Executes reporting database maintenance process
-# When modifying this, the following must be considered:
-#  - Intervals less than 6 hours must be used with caution
-#       as maintenance process could take a considerable time
-#  - parameters to action => bg("<if_elapsed>", "<expireafter>")
-#       must be changed accordingly
-{
-  commands:
-
-    (Hr00|Hr06|Hr12|Hr18).Min00_05::
-
-      "$(sys.cf_hub) -m"
-      comment => "Perform hub database maintenance. This removes expired entries in the enterprise database and creates a total compliance cache for Mission Portal",
-      classes => kept_successful_command,
-      handle => "cfe_internal_start_hub_start_maintenance",
-      action => bg("60","60");
-}
-
+#################################################
+# CFEngine Enterprise Hub HA policy inclusion
+#################################################
 bundle common cfengine_enterprise_hub_ha
+# @brief Inputs specific to CFEngine Enterpise
 {
   vars:
-    "classification_bundles"
+    enable_cfengine_enterprise_hub_ha::
+
+      "input[ha_main]"
+        string => "cfe_internal/ha/ha.cf";
+      "input[ha_def]"
+        string => "cfe_internal/ha/ha_def.cf";
+
+      "classification_bundles"
+        slist => { "ha_def" };
+
+      "management_bundles"
+        slist => { "ha_main" };
+
+      "inputs" slist => getvalues(input);
+
+    !enable_cfengine_enterprise_hub_ha::
+
+      "classification_bundles"
+        slist => { "$(this.bundle)" };
+
+      "management_bundles"
+        slist => { "$(this.bundle)" };
+
+      "inputs"
         slist => { };
 
-    "management_bundles"
-        slist => { };
 }
-
-bundle agent cfe_internal_cleanup_agent_reports {}
-# @ignore
-# @brief cleanup accumulated agent reports if they grow too large (do not apply for cfengine < 3.6.0)
+body file control
+{
+  inputs => { @(cfengine_enterprise_hub_ha.inputs) };
+}
