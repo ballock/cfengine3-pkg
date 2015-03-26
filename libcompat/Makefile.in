@@ -80,16 +80,15 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = libcompat
-DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	getaddrinfo.c strndup.c strlcpy.c getline.c unsetenv.c \
-	pthread_attr_setstacksize.c strstr.c nanosleep.c memmem.c \
-	memrchr.c strdup.c srand48.c drand48.c memdup.c \
-	pthread_sigmask.c setlinebuf.c fchownat.c dirfd.c strnlen.c \
-	strsep.c strerror.c fstatat.c strcasecmp.c getloadavg.c \
-	rpl_ctime.c inet_pton.c strrstr.c openat.c log2.c snprintf.c \
-	mkdtemp.c strcasestr.c gmtime_r.c strncasecmp.c round.c \
-	inet_ntop.c localtime_r.c strlcat.c strsignal.c \
-	clock_gettime.c $(top_srcdir)/depcomp
+DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am rpl_ctime.c \
+	mkdtemp.c pthread_attr_setstacksize.c strerror.c setlinebuf.c \
+	getline.c memmem.c strrstr.c strncasecmp.c memdup.c round.c \
+	pthread_sigmask.c inet_pton.c getloadavg.c srand48.c drand48.c \
+	clock_gettime.c strlcpy.c strcasecmp.c gmtime_r.c strdup.c \
+	strnlen.c strsep.c dirfd.c log2.c openat.c unsetenv.c \
+	fchownat.c strsignal.c strcasestr.c localtime_r.c strstr.c \
+	snprintf.c getaddrinfo.c nanosleep.c memrchr.c fstatat.c \
+	inet_ntop.c strlcat.c strndup.c $(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acinclude.m4 \
 	$(top_srcdir)/m4/adl_recursive_eval.m4 \

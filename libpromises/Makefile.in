@@ -160,14 +160,14 @@ am__libpromises_la_SOURCES_DIST = cf3parse.y cf3parse.h cf3lex.l \
 	cf3globals.c chflags.c chflags.h class.c class.h constants.c \
 	conversion.c conversion.h crypto.c crypto.h dbm_api.c \
 	dbm_api.h dbm_priv.h dbm_migration.c dbm_migration.h \
-	dbm_migration_lastseen.c dbm_migration_bundles.c dbm_lmdb.c \
-	dbm_quick.c dbm_tokyocab.c enterprise_extension.c \
-	enterprise_extension.h enterprise_stubs.c eval_context.c \
-	eval_context.h evalfunction.c evalfunction.h exec_tools.c \
-	exec_tools.h expand.c expand.h extensions.c extensions.h \
-	files_copy.c files_copy.h files_hashes.c files_hashes.h \
-	files_interfaces.c files_interfaces.h files_lib.c files_lib.h \
-	files_names.c files_names.h fncall.c fncall.h generic_agent.c \
+	dbm_migration_lastseen.c dbm_lmdb.c dbm_quick.c dbm_tokyocab.c \
+	enterprise_extension.c enterprise_extension.h \
+	enterprise_stubs.c eval_context.c eval_context.h \
+	evalfunction.c evalfunction.h exec_tools.c exec_tools.h \
+	expand.c expand.h extensions.c extensions.h files_copy.c \
+	files_copy.h files_hashes.c files_hashes.h files_interfaces.c \
+	files_interfaces.h files_lib.c files_lib.h files_names.c \
+	files_names.h fncall.c fncall.h generic_agent.c \
 	generic_agent.h granules.c granules.h instrumentation.c \
 	instrumentation.h item_lib.c item_lib.h iteration.c \
 	iteration.h keyring.c keyring.h known_dirs.c known_dirs.h \
@@ -206,21 +206,20 @@ am_libpromises_la_OBJECTS = cf3parse.lo cf3lex.lo acl_tools_posix.lo \
 	actuator.lo addr_lib.lo assoc.lo audit.lo attributes.lo \
 	bootstrap.lo cf3globals.lo chflags.lo class.lo constants.lo \
 	conversion.lo crypto.lo dbm_api.lo dbm_migration.lo \
-	dbm_migration_lastseen.lo dbm_migration_bundles.lo dbm_lmdb.lo \
-	dbm_quick.lo dbm_tokyocab.lo enterprise_extension.lo \
-	enterprise_stubs.lo eval_context.lo evalfunction.lo \
-	exec_tools.lo expand.lo extensions.lo files_copy.lo \
-	files_hashes.lo files_interfaces.lo files_lib.lo \
-	files_names.lo fncall.lo generic_agent.lo granules.lo \
-	instrumentation.lo item_lib.lo iteration.lo keyring.lo \
-	known_dirs.lo lastseen.lo loading.lo locks.lo \
-	logic_expressions.lo matching.lo math_eval.lo mod_access.lo \
-	mod_common.lo mod_databases.lo mod_environ.lo mod_exec.lo \
-	mod_files.lo mod_measurement.lo mod_methods.lo mod_outputs.lo \
-	mod_packages.lo mod_process.lo mod_report.lo mod_services.lo \
-	mod_storage.lo mod_knowledge.lo mod_users.lo modes.lo mutex.lo \
-	ornaments.lo policy.lo parser.lo patches.lo pipes.lo \
-	processes_select.lo promises.lo rlist.lo scope.lo \
+	dbm_migration_lastseen.lo dbm_lmdb.lo dbm_quick.lo \
+	dbm_tokyocab.lo enterprise_extension.lo enterprise_stubs.lo \
+	eval_context.lo evalfunction.lo exec_tools.lo expand.lo \
+	extensions.lo files_copy.lo files_hashes.lo \
+	files_interfaces.lo files_lib.lo files_names.lo fncall.lo \
+	generic_agent.lo granules.lo instrumentation.lo item_lib.lo \
+	iteration.lo keyring.lo known_dirs.lo lastseen.lo loading.lo \
+	locks.lo logic_expressions.lo matching.lo math_eval.lo \
+	mod_access.lo mod_common.lo mod_databases.lo mod_environ.lo \
+	mod_exec.lo mod_files.lo mod_measurement.lo mod_methods.lo \
+	mod_outputs.lo mod_packages.lo mod_process.lo mod_report.lo \
+	mod_services.lo mod_storage.lo mod_knowledge.lo mod_users.lo \
+	modes.lo mutex.lo ornaments.lo policy.lo parser.lo patches.lo \
+	pipes.lo processes_select.lo promises.lo rlist.lo scope.lo \
 	shared_lib.lo signals.lo sort.lo storage_tools.lo \
 	string_expressions.lo syntax.lo syslog_client.lo systype.lo \
 	timeout.lo unix.lo var_expressions.lo vars.lo variable.lo \
@@ -560,7 +559,7 @@ workdir = @workdir@
 @BUILTIN_EXTENSIONS_TRUE@	$(OPENSSL_LDFLAGS) $(SQLITE3_LDFLAGS) \
 @BUILTIN_EXTENSIONS_TRUE@	$(LIBACL_LDFLAGS)
 @BUILTIN_EXTENSIONS_TRUE@noinst_LTLIBRARIES = libpromises.la
-EXTRA_DIST = extensions_template.c extensions_template.h enterprise_extension.sed math.pc
+EXTRA_DIST = extensions_template.c extensions_template.h enterprise_extension.sed math.pc text2cstring.pl failsafe.cf
 AM_CPPFLAGS = \
 	-I$(srcdir)/../libutils -I$(srcdir)/../libcfnet \
 	-I$(srcdir)/../libenv $(ENTERPRISE_CPPFLAGS) \
@@ -582,14 +581,13 @@ libpromises_la_SOURCES = cf3parse.y cf3parse.h cf3lex.l acl_tools.h \
 	chflags.c chflags.h class.c class.h constants.c conversion.c \
 	conversion.h crypto.c crypto.h dbm_api.c dbm_api.h dbm_priv.h \
 	dbm_migration.c dbm_migration.h dbm_migration_lastseen.c \
-	dbm_migration_bundles.c dbm_lmdb.c dbm_quick.c dbm_tokyocab.c \
-	enterprise_extension.c enterprise_extension.h \
-	enterprise_stubs.c eval_context.c eval_context.h \
-	evalfunction.c evalfunction.h exec_tools.c exec_tools.h \
-	expand.c expand.h extensions.c extensions.h files_copy.c \
-	files_copy.h files_hashes.c files_hashes.h files_interfaces.c \
-	files_interfaces.h files_lib.c files_lib.h files_names.c \
-	files_names.h fncall.c fncall.h generic_agent.c \
+	dbm_lmdb.c dbm_quick.c dbm_tokyocab.c enterprise_extension.c \
+	enterprise_extension.h enterprise_stubs.c eval_context.c \
+	eval_context.h evalfunction.c evalfunction.h exec_tools.c \
+	exec_tools.h expand.c expand.h extensions.c extensions.h \
+	files_copy.c files_copy.h files_hashes.c files_hashes.h \
+	files_interfaces.c files_interfaces.h files_lib.c files_lib.h \
+	files_names.c files_names.h fncall.c fncall.h generic_agent.c \
 	generic_agent.h granules.c granules.h instrumentation.c \
 	instrumentation.h item_lib.c item_lib.h iteration.c \
 	iteration.h keyring.c keyring.h known_dirs.c known_dirs.h \
@@ -741,7 +739,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_lmdb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_migration.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_migration_bundles.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_migration_lastseen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_quick.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbm_tokyocab.Plo@am__quote@
