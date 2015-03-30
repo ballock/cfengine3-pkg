@@ -1,8 +1,8 @@
-cfengine3 (3.6.4-0.1) UNRELEASED; urgency=medium
+cfengine3 (3.6.5-0.1) UNRELEASED; urgency=medium
 
   * Merged new upstream version (minor bugfix release).
 
- -- Bolesław Tokarski <boleslaw.tokarski@opera.com>  Thu, 26 Feb 2015 22:47:25 +0100
+ -- Bolesław Tokarski <boleslaw.tokarski@opera.com>  Mon, 30 Mar 2015 23:26:34 +0200
 
 cfengine3 (3.6.2-4) unstable; urgency=medium
 
