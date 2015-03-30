@@ -29,6 +29,8 @@
 
 #include <unistd.h>
 
+int SPAWNED_PID = -1;
+
 static void test_process_start_time(void)
 {
     int this_pid, new_pid;
@@ -42,31 +44,38 @@ static void test_process_start_time(void)
     new_pid = fork();
 
     assert_true(new_pid >= 0);
-    if (new_pid == 0)
+    if (new_pid == 0)                                           /* child */
     {
         execl("/bin/sleep", "/bin/sleep", "5", NULL);
-        assert_true(false);
+        assert_true(false);                                  /* unreachable */
     }
+
+    SPAWNED_PID = new_pid;
 
     time_t newproc_starttime = GetProcessStartTime(new_pid);
     // We might have slipped by a few seconds, but shouldn't be much.
     assert_true(newproc_starttime >= this_starttime + 1 && newproc_starttime <= this_starttime + 5);
 
     kill(new_pid, SIGKILL);
+    wait(NULL);
+    SPAWNED_PID = -1;
 }
 
 static void test_process_state(void)
 {
-    int new_pid;
+    int new_pid, ret;
 
     new_pid = fork();
 
     assert_true(new_pid >= 0);
-    if (new_pid == 0)
+    if (new_pid == 0)                                           /* child */
     {
-        execl("/bin/sleep", "/bin/sleep", "5", NULL);
-        assert_true(false);
+        execl("/bin/sleep", "/bin/sleep", "10", NULL);
+        assert_true(false);                                  /* unreachable */
     }
+
+    SPAWNED_PID = new_pid;
+    printf("Spawned a \"sleep\" child with PID %d\n", new_pid);
 
     int state = -1000;
 
@@ -82,9 +91,12 @@ static void test_process_state(void)
             usleep(200000);
         }
     }
+    printf("Started, state: %d\n", state);
     assert_int_equal(state, PROCESS_STATE_RUNNING);
 
-    kill(new_pid, SIGSTOP);
+    ret = kill(new_pid, SIGSTOP);
+    assert_int_equal(ret, 0);
+
     for (int c = 0; c < 10; c++)
     {
         state = GetProcessState(new_pid);
@@ -97,9 +109,12 @@ static void test_process_state(void)
             usleep(200000);
         }
     }
+    printf("Stopped, state: %d\n", state);
     assert_int_equal(state, PROCESS_STATE_STOPPED);
 
-    kill(new_pid, SIGCONT);
+    ret = kill(new_pid, SIGCONT);
+    assert_int_equal(ret, 0);
+
     for (int c = 0; c < 10; c++)
     {
         state = GetProcessState(new_pid);
@@ -112,9 +127,18 @@ static void test_process_state(void)
             usleep(200000);
         }
     }
+    printf("Resumed, state: %d\n", state);
     assert_int_equal(state, PROCESS_STATE_RUNNING);
 
+    /* Terminate the child process and reap the zombie. */
     kill(new_pid, SIGKILL);
+    wait(NULL);
+
+    state = GetProcessState(new_pid);
+    printf("Killed,  state: %d\n", state);
+    assert_int_equal(state, PROCESS_STATE_DOES_NOT_EXIST);
+
+    SPAWNED_PID = -1;
 }
 
 int main()
@@ -127,5 +151,13 @@ int main()
         unit_test(test_process_state),
     };
 
-    return run_tests(tests);
+    int ret = run_tests(tests);
+
+    /* Make sure no child is alive. */
+    if (SPAWNED_PID >= 0)
+    {
+        kill(SPAWNED_PID, SIGKILL);
+    }
+
+    return ret;
 }

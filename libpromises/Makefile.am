@@ -32,7 +32,7 @@ endif
 AM_LDFLAGS += $(LMDB_LDFLAGS) $(TOKYOCABINET_LDFLAGS) $(QDBM_LDFLAGS) \
 	$(PCRE_LDFLAGS) $(OPENSSL_LDFLAGS) $(SQLITE3_LDFLAGS) $(LIBACL_LDFLAGS)
 
-EXTRA_DIST = extensions_template.c extensions_template.h enterprise_extension.sed math.pc
+EXTRA_DIST = extensions_template.c extensions_template.h enterprise_extension.sed math.pc text2cstring.pl failsafe.cf
 
 AM_CPPFLAGS = \
 	-I$(srcdir)/../libutils -I$(srcdir)/../libcfnet \
@@ -73,7 +73,6 @@ libpromises_la_SOURCES = \
         dbm_api.c dbm_api.h dbm_priv.h \
         dbm_migration.c dbm_migration.h \
         dbm_migration_lastseen.c \
-        dbm_migration_bundles.c \
         dbm_lmdb.c \
         dbm_quick.c \
         dbm_tokyocab.c \
