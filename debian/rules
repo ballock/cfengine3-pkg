@@ -1,10 +1,6 @@
 #!/usr/bin/make -f
 # vim:noet:ts=4:sw=4:
 
-ifeq ($(DEB_BUILD_ARCH_OS),linux)
-SELINUX_FLAGS = --enable-selinux
-endif
-
 %:
 	dh $@ --with quilt
 
@@ -23,7 +19,7 @@ override_dh_auto_configure:
 			--libdir=/usr/lib/cfengine3 \
 			--docdir=\$${prefix}/share/doc/cfengine3 \
 			--datadir=\$${prefix}/share/cfengine3 \
-			--mandir=\$${prefix}/share/man $(SELINUX_FLAGS) \
+			--mandir=\$${prefix}/share/man \
 			CFLAGS="$(CFLAGS)" LDFLAGS="-Wl,-z,relro" \
 			CPPFLAGS=-D_FORTIFY_SOURCE=2
 	cd masterfiles && ./autogen.sh  --prefix=/usr/share/cfengine3 \
